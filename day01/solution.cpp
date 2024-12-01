@@ -6,14 +6,8 @@ auto part1(const T& input)
 {
     aoc::timer timer;
 
-    vector<int> va;
-    vector<int> vb;
-
-    for (auto [a, b]: input)
-    {
-        va.push_back(a);
-        vb.push_back(b);
-    }
+    auto va = aoc::collect<0>(input);
+    auto vb = aoc::collect<1>(input);
 
     r::sort(va);
     r::sort(vb);
@@ -33,14 +27,8 @@ auto part2(T& input)
 {
     aoc::timer timer;
 
-    vector<int> va;
-    vector<int> vb;
-
-    for (auto [a, b]: input)
-    {
-        va.push_back(a);
-        vb.push_back(b);
-    }
+    auto va = aoc::collect<0>(input);
+    auto vb = aoc::collect<1>(input);
 
     int result = 0;
     for (auto i: aoc::range(va.size()))

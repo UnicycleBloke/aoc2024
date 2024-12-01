@@ -81,6 +81,22 @@ std::vector<T> make_vector(std::string input, std::string delim = ",")
 }
 
 
+// Iterate over a container of some tuple (e.g. created with read_lines()) and 
+// return a vector of the I'th elements of each tuple instance.
+template <size_t I, typename Tuple>
+auto collect(const vector<Tuple>& input) 
+{
+    using T = tuple_element_t<I, Tuple>;
+    vector <T> result;
+    result.reserve(input.size());
+    for (const auto& t: input)
+    {
+        result.emplace_back(get<I>(t));
+    }
+    return result;
+}
+
+
 // Extract arguments from a formatted string into a tuple, via regex.
 // .      not newline any character except line terminators (LF, CR, LS, PS).
 // \t     tab (HT)
