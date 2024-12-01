@@ -12,6 +12,7 @@
 #include <numeric>
 #include <algorithm>
 #include <limits>
+#include <ranges>
 
 #include <string>
 #include <regex>
@@ -23,12 +24,13 @@
 
 #include "conway.h"
 #include "range.h"
-//#include "cpp_curses.h"
 
 
 using namespace std;
 namespace fs = std::filesystem;
 namespace cr = std::chrono;
+namespace r  = std::ranges;
+namespace v  = std::views;
 
 
 namespace aoc {

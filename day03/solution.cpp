@@ -39,11 +39,9 @@ void run(const char* filename)
 
     auto p1 = part1(lines);
     cout << "Part1: " << p1 << '\n';
-    aoc::check_result(p1, 0);
-
+    
     auto p2 = part2(lines);
     cout << "Part2: " << p2 << '\n';
-    aoc::check_result(p2, 0);
 }
 
 
