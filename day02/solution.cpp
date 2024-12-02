@@ -8,9 +8,8 @@ bool is_valid_report(const auto& r)
     for (auto i: aoc::range(r.size() - 1))
     {
         auto del  = abs(r[i + 1] - r[i]);
-        if (del < 1) valid = false;
-        if (del > 3) valid = false;
-        if (aoc::sgn(r[i + 1] - r[i]) != dir) valid = false;
+        auto sgn  = aoc::sgn(r[i + 1] - r[i]);
+        valid &= (del >= 1) && (del <= 3) && (sgn == dir);
     }
     return valid;
 };
