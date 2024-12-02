@@ -1,11 +1,33 @@
 #include "utils.h"
 
 
+bool is_valid_report(const auto& r)
+{
+    bool valid = true;
+    auto dir   = aoc::sgn(r[1] - r[0]);
+    for (auto i: aoc::range(r.size() - 1))
+    {
+        auto del  = abs(r[i + 1] - r[i]);
+        if (del < 1) valid = false;
+        if (del > 3) valid = false;
+        if (aoc::sgn(r[i + 1] - r[i]) != dir) valid = false;
+    }
+    return valid;
+};
+
+
 template <typename T>
 auto part1(const T& input)
 {
     aoc::timer timer;
-    return 0;
+
+    int safe = 0;
+    for (auto& r: input)
+    {
+        safe += is_valid_report(r);
+    }
+
+    return safe;
 }
 
 
@@ -13,7 +35,30 @@ template <typename T>
 auto part2(T& input)
 {
     aoc::timer timer;
-    return 0;
+
+    int safe = 0;
+    for (auto& r: input)
+    {
+        if (is_valid_report(r))
+        {
+            ++safe;
+        }
+        else
+        {
+            for (auto i: aoc::range(r.size()))
+            {
+                auto r2 = r;
+                r2.erase(r2.begin() + i);
+                if (is_valid_report(r2))
+                {
+                    ++safe;
+                    break;
+                }
+            }
+        }
+    }
+
+    return safe;
 }
 
 
@@ -36,11 +81,19 @@ auto part2(T& input)
 void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
+    vector<vector<int>> input;
+    for (auto line: lines)
+    {
+        auto v = aoc::make_vector<int>(line, " ");
+        input.push_back(v);
+        // for (auto i: v) cout << i << " ";
+        // cout << endl;
+    }
 
-    auto p1 = part1(lines);
+    auto p1 = part1(input);
     cout << "Part1: " << p1 << '\n';
     
-    auto p2 = part2(lines);
+    auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
 }
 
