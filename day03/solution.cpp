@@ -35,40 +35,26 @@ auto part2(T& input)
     int total{};
     for (auto mem: input)
     {
-        regex  r_mul(R"(mul\(([+-]?\d+),([+-]?\d+)\))", regex_constants::icase);
-        smatch m_mul;
+        regex  r(R"(mul\(([+-]?\d+),([+-]?\d+)\)|do\(\)|don't\(\))", regex_constants::icase);
+        smatch m;
 
-        regex  r_do(R"(do\(\))", regex_constants::icase);
-        smatch m_do;
-
-        regex  r_dont(R"(don't\(\))", regex_constants::icase);
-        smatch m_dont;
-
-        string::const_iterator start(mem.cbegin());
-        while (regex_search(start, mem.cend(), m_mul, r_mul))
+        auto start{mem.cbegin()};
+        while (regex_search(start, mem.cend(), m, r))
         {
-            // Also scan for the next do() or don't().
-            regex_search(start, mem.cend(), m_do, r_do);
-            regex_search(start, mem.cend(), m_dont, r_dont);
-
-            // Use the suffix() iterators to determine which of the three instructions comes next.     
-            auto i_mul  = m_mul.suffix().first;
-            auto i_do   = m_do.suffix().first;
-            auto i_dont = m_dont.suffix().first;
-            start = min(i_mul, min(i_do, i_dont));
+            start = m.suffix().first;
 
             // Perform the instruction.
-            if (start == i_mul)
-            {
-                total += stoi(m_mul.str(1)) * stoi(m_mul.str(2)) * enable;
-            }
-            else if (start == i_do)
+            if (m.str() == "do()")
             {
                 enable = 1;                
             }
-            else if (start == i_dont)
+            else if (m.str() == "don't()")
             {
                 enable = 0;
+            }
+            else
+            {
+                total += stoi(m.str(1)) * stoi(m.str(2)) * enable;
             }
         }
     }
