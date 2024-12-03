@@ -10,14 +10,20 @@ auto part1(const T& input)
     for (auto mem: input)
     {
         regex  r(R"(mul\(([+-]?\d+),([+-]?\d+)\))", regex_constants::icase);
-        smatch m;
-        
-        string::const_iterator start(mem.cbegin());
-        while (regex_search(start, mem.cend(), m, r))
+
+        vector<smatch> matches{sregex_iterator{mem.cbegin(), mem.cend(), r}, sregex_iterator{}};
+        for (auto m: matches)
         {
             total += stoi(m.str(1)) * stoi(m.str(2));
-            start = m.suffix().first;
-        }
+        } 
+
+        // smatch m;       
+        // auto start{mem.cbegin()};
+        // while (regex_search(start, mem.cend(), m, r))
+        // {
+        //     total += stoi(m.str(1)) * stoi(m.str(2));
+        //     start = m.suffix().first;
+        // }
     }
 
     return total;
@@ -36,14 +42,10 @@ auto part2(T& input)
     for (auto mem: input)
     {
         regex  r(R"(mul\(([+-]?\d+),([+-]?\d+)\)|do\(\)|don't\(\))", regex_constants::icase);
-        smatch m;
 
-        auto start{mem.cbegin()};
-        while (regex_search(start, mem.cend(), m, r))
+        vector<smatch> matches{sregex_iterator{mem.cbegin(), mem.cend(), r}, sregex_iterator{}};
+        for (auto m: matches)
         {
-            start = m.suffix().first;
-
-            // Perform the instruction.
             if (m.str() == "do()")
             {
                 enable = 1;                
@@ -57,6 +59,27 @@ auto part2(T& input)
                 total += stoi(m.str(1)) * stoi(m.str(2)) * enable;
             }
         }
+
+        // smatch m;
+        // auto start{mem.cbegin()};
+        // while (regex_search(start, mem.cend(), m, r))
+        // {
+        //     start = m.suffix().first;
+
+        //     // Perform the instruction.
+        //     if (m.str() == "do()")
+        //     {
+        //         enable = 1;                
+        //     }
+        //     else if (m.str() == "don't()")
+        //     {
+        //         enable = 0;
+        //     }
+        //     else
+        //     {
+        //         total += stoi(m.str(1)) * stoi(m.str(2)) * enable;
+        //     }
+        // }
     }
 
     return total;
