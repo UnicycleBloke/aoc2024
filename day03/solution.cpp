@@ -5,7 +5,22 @@ template <typename T>
 auto part1(const T& input)
 {
     aoc::timer timer;
-    return 0;
+
+    int total{};
+    for (auto mem: input)
+    {
+        regex  r(R"(mul\(([+-]?\d+),([+-]?\d+)\))", regex_constants::icase);
+        smatch m;
+        
+        string::const_iterator start(mem.cbegin());
+        while (regex_search(start, mem.cend(), m, r))
+        {
+            total += stoi(m.str(1)) * stoi(m.str(2));
+            start = m.suffix().first;
+        }
+    }
+
+    return total;
 }
 
 
@@ -13,26 +28,55 @@ template <typename T>
 auto part2(T& input)
 {
     aoc::timer timer;
-    return 0;
+
+    // Initially enabled.
+    int enable = 1;
+
+    int total{};
+    for (auto mem: input)
+    {
+        regex  r_mul(R"(mul\(([+-]?\d+),([+-]?\d+)\))", regex_constants::icase);
+        smatch m_mul;
+
+        regex  r_do(R"(do\(\))", regex_constants::icase);
+        smatch m_do;
+
+        regex  r_dont(R"(don't\(\))", regex_constants::icase);
+        smatch m_dont;
+
+        string::const_iterator start(mem.cbegin());
+        while (regex_search(start, mem.cend(), m_mul, r_mul))
+        {
+            // Also scan for the next do() or don't().
+            regex_search(start, mem.cend(), m_do, r_do);
+            regex_search(start, mem.cend(), m_dont, r_dont);
+
+            // Use the suffix() iterators to determine which of the three instructions comes next.     
+            auto i_mul  = m_mul.suffix().first;
+            auto i_do   = m_do.suffix().first;
+            auto i_dont = m_dont.suffix().first;
+            start = min(i_mul, min(i_do, i_dont));
+
+            // Perform the instruction.
+            if (start == i_mul)
+            {
+                total += stoi(m_mul.str(1)) * stoi(m_mul.str(2)) * enable;
+            }
+            else if (start == i_do)
+            {
+                enable = 1;                
+            }
+            else if (start == i_dont)
+            {
+                enable = 0;
+            }
+        }
+    }
+
+    return total;
 }
 
 
-// vector<tuple<Args...>>
-//auto lines = aoc::read_lines<int,int,int,int>(filename, R"((\d+)-(\d+),(\d+)-(\d+))");
-
-// vector<string>    
-//auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
-
-// Replace all substrings matching "search" with "replace".
-//std::string replace(std::string source, const std::string& search, const std::string& replace);
-
-// Split a delimited string of tokens into a vector of string tokens. Trims substrings by default and drops trimmed 
-// tokens which are empty by default. Not convinced how useful the option are, but you never know.
-//std::vector<std::string> split(std::string source, std::string delim, Blanks allow_blanks = Blanks::Suppress, Trim trim_subs = Trim::Yes);
-
-// vector (size_type n, const value_type& val = value_type(),
-//vector<int> row(COLS, 0);
-//vector<vector<int>> grid(ROWS, row);
 void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 

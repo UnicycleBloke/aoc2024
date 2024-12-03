@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project("aoc2023")
+project("aoc2024")
 
 add_subdirectory(utils)
 
