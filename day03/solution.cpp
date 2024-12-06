@@ -16,14 +16,6 @@ auto part1(const T& input)
         {
             total += stoi(m.str(1)) * stoi(m.str(2));
         } 
-
-        // smatch m;       
-        // auto start{mem.cbegin()};
-        // while (regex_search(start, mem.cend(), m, r))
-        // {
-        //     total += stoi(m.str(1)) * stoi(m.str(2));
-        //     start = m.suffix().first;
-        // }
     }
 
     return total;
@@ -59,27 +51,6 @@ auto part2(T& input)
                 total += stoi(m.str(1)) * stoi(m.str(2)) * enable;
             }
         }
-
-        // smatch m;
-        // auto start{mem.cbegin()};
-        // while (regex_search(start, mem.cend(), m, r))
-        // {
-        //     start = m.suffix().first;
-
-        //     // Perform the instruction.
-        //     if (m.str() == "do()")
-        //     {
-        //         enable = 1;                
-        //     }
-        //     else if (m.str() == "don't()")
-        //     {
-        //         enable = 0;
-        //     }
-        //     else
-        //     {
-        //         total += stoi(m.str(1)) * stoi(m.str(2)) * enable;
-        //     }
-        // }
     }
 
     return total;
