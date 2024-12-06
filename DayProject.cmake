@@ -11,6 +11,6 @@ target_include_directories(${AOC_PROGRAM_NAME} PUBLIC
     ../utils
 )
 
-target_compile_options(${AOC_PROGRAM_NAME} PUBLIC -std=c++20 -O2)
+target_compile_options(${AOC_PROGRAM_NAME} PUBLIC -std=c++20 -O3)
 #target_link_libraries(${AOC_PROGRAM_NAME} curses aocutils)
 target_link_libraries(${AOC_PROGRAM_NAME} aocutils)
