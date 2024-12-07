@@ -8,34 +8,42 @@ struct Equation
 };
 
 
+// Recursive binary search.
 bool could_be_true(const Equation& e, uint64_t result, int index)
 {
+    // Condition increases part1 execution time.
+    //if (result > e.result) return false;
+    
     if (index == e.operands.size())
         return e.result == result;
     
-    bool add = could_be_true(e, result + e.operands[index], index + 1);
-    bool mul = could_be_true(e, result * e.operands[index], index + 1);
-    return add || mul;
+    // Return early rather than evaluate further. Cheaper operator first.
+    if (could_be_true(e, result + e.operands[index], index + 1)) return true;
+    return could_be_true(e, result * e.operands[index], index + 1);
 }
 
 
+// Recursive trinary search.
 bool could_be_true2(const Equation& e, uint64_t result, int index)
 {
+    // Condition reduces part2 execution time.
+    if (result > e.result) return false;
+
     if (index == e.operands.size())
         return e.result == result;
     
-    bool add = could_be_true2(e, result + e.operands[index], index + 1);
-    bool mul = could_be_true2(e, result * e.operands[index], index + 1);
+    // Return early rather than evaluate further. Cheaper operator first.
+    if (could_be_true2(e, result + e.operands[index], index + 1)) return true;
+    if (could_be_true2(e, result * e.operands[index], index + 1)) return true;
 
+    // Concatentation operator.
     auto temp = e.operands[index];
     while (temp > 0)
     {
         result *= 10;
         temp   /= 10;
     }
-    bool cat = could_be_true2(e, result + e.operands[index], index + 1);
-
-    return add || mul | cat;
+    return could_be_true2(e, result + e.operands[index], index + 1);
 }
 
 
