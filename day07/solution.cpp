@@ -1,11 +1,56 @@
 #include "utils.h"
 
 
+struct Equation
+{
+    uint64_t result;
+    vector<uint64_t> operands;
+};
+
+
+bool could_be_true(const Equation& e, uint64_t result, int index)
+{
+    if (index == e.operands.size())
+        return e.result == result;
+    
+    bool add = could_be_true(e, result + e.operands[index], index + 1);
+    bool mul = could_be_true(e, result * e.operands[index], index + 1);
+    return add || mul;
+}
+
+
+bool could_be_true2(const Equation& e, uint64_t result, int index)
+{
+    if (index == e.operands.size())
+        return e.result == result;
+    
+    bool add = could_be_true2(e, result + e.operands[index], index + 1);
+    bool mul = could_be_true2(e, result * e.operands[index], index + 1);
+
+    auto temp = e.operands[index];
+    while (temp > 0)
+    {
+        result *= 10;
+        temp   /= 10;
+    }
+    bool cat = could_be_true2(e, result + e.operands[index], index + 1);
+
+    return add || mul | cat;
+}
+
+
 template <typename T>
 auto part1(const T& input)
 {
     aoc::timer timer;
-    return 0;
+
+    uint64_t total{};
+    for (auto& e: input)
+    {
+        if (could_be_true(e, e.operands[0], 1)) total += e.result;
+    }
+
+    return total;
 }
 
 
@@ -13,37 +58,37 @@ template <typename T>
 auto part2(T& input)
 {
     aoc::timer timer;
-    return 0;
+
+    uint64_t total{};
+    for (auto& e: input)
+    {
+        if (could_be_true2(e, e.operands[0], 1)) total += e.result;
+    }
+
+    return total;
 }
 
 
-// vector<tuple<Args...>>
-//auto lines = aoc::read_lines<int,int,int,int>(filename, R"((\d+)-(\d+),(\d+)-(\d+))");
-
-// vector<string>    
-//auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
-
-// Replace all substrings matching "search" with "replace".
-//std::string replace(std::string source, const std::string& search, const std::string& replace);
-
-// Split a delimited string of tokens into a vector of string tokens. Trims substrings by default and drops trimmed 
-// tokens which are empty by default. Not convinced how useful the option are, but you never know.
-//std::vector<std::string> split(std::string source, std::string delim, Blanks allow_blanks = Blanks::Suppress, Trim trim_subs = Trim::Yes);
-
-// vector (size_type n, const value_type& val = value_type(),
-//vector<int> row(COLS, 0);
-//vector<vector<int>> grid(ROWS, row);
 void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
 
-    auto p1 = part1(lines);
+    vector<Equation> equations;
+    for (auto& line: lines)
+    {
+        auto s = aoc::split(line, ":");
+        Equation e;
+        e.result = stoll(s[0]);
+        e.operands = aoc::make_vector<uint64_t>(s[1], " ");
+        equations.push_back(e);
+    }
+
+    auto p1 = part1(equations);
     cout << "Part1: " << p1 << '\n';
     
-
-    auto p2 = part2(lines);
+    auto p2 = part2(equations);
     cout << "Part2: " << p2 << '\n';
-    
+   
 }
 
 
