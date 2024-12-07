@@ -9,7 +9,7 @@ auto part1(const T& input)
     int total{};
     for (auto mem: input)
     {
-        regex  r(R"(mul\(([+-]?\d+),([+-]?\d+)\))", regex_constants::icase);
+        regex  r(R"(mul\((\d{1,3}),(\d{1,3})\))", regex_constants::icase);
 
         vector<smatch> matches{sregex_iterator{mem.cbegin(), mem.cend(), r}, sregex_iterator{}};
         for (auto m: matches)
@@ -33,7 +33,7 @@ auto part2(T& input)
     int total{};
     for (auto mem: input)
     {
-        regex  r(R"(mul\(([+-]?\d+),([+-]?\d+)\)|do\(\)|don't\(\))", regex_constants::icase);
+        regex  r(R"(mul\((\d{1,3}),(\d{1,3})\)|do\(\)|don't\(\))", regex_constants::icase);
 
         vector<smatch> matches{sregex_iterator{mem.cbegin(), mem.cend(), r}, sregex_iterator{}};
         for (auto m: matches)
