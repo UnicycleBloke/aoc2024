@@ -53,7 +53,7 @@ auto part1(const T& input)
     aoc::timer timer;
 
     uint64_t total{};
-    for (auto& e: input)
+    for (const auto& e: input)
     {
         if (could_be_true(e, e.operands[0], 1)) total += e.result;
     }
@@ -68,7 +68,7 @@ auto part2(T& input)
     aoc::timer timer;
 
     uint64_t total{};
-    for (auto& e: input)
+    for (const auto& e: input)
     {
         if (could_be_true2(e, e.operands[0], 1)) total += e.result;
     }
@@ -82,7 +82,7 @@ void run(const char* filename)
     auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
 
     vector<Equation> equations;
-    for (auto& line: lines)
+    for (const auto& line: lines)
     {
         auto s = aoc::split(line, ":");
         Equation e;
