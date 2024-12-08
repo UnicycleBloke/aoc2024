@@ -2,48 +2,118 @@
 
 
 template <typename T>
-auto part1(const T& input)
+auto part1(const T& input, int rows, int cols)
 {
     aoc::timer timer;
-    return 0;
+
+    set<tuple<int, int>> nodes;
+
+    for (auto& [freq, locs]: input)
+    {
+        for (auto i: aoc::range(locs.size()))
+        {
+            auto& [ri, ci] = locs[i];
+            for (auto j: aoc::range(i + 1, locs.size()))
+            {
+                const auto& [rj, cj] = locs[j];
+
+                int rd = rj - ri;
+                int cd = cj - ci;
+
+                auto insert = [&](int r, int c)
+                {
+                    if ((r >= 0) && (r < rows) && (c >= 0) && (c < cols))
+                        nodes.insert(make_tuple(r, c));
+                };
+
+                insert(rj + rd, cj + cd);
+                insert(ri - rd, ci - cd);
+            }
+        }
+    }
+
+    return nodes.size();
 }
 
 
 template <typename T>
-auto part2(T& input)
+auto part2(T& input, int rows, int cols)
 {
     aoc::timer timer;
-    return 0;
+
+    set<tuple<int, int>> nodes;
+
+    for (auto& [freq, locs]: input)
+    {
+        for (auto i: aoc::range(locs.size()))
+        {
+            auto& [ri, ci] = locs[i];
+            for (auto j: aoc::range(i + 1, locs.size()))
+            {
+                const auto& [rj, cj] = locs[j];
+
+                int rd = rj - ri;
+                int cd = cj - ci;
+
+                auto insert = [&](int r, int c)
+                {
+                    if ((r >= 0) && (r < rows) && (c >= 0) && (c < cols))
+                    {
+                        nodes.insert(make_tuple(r, c));
+                        return true;
+                    }
+                    return false;
+                };
+
+                //insert(rj + rd, cj + cd);
+                int row = rj;
+                int col = cj;
+                while (insert(row, col))
+                {
+                    row -= rd;
+                    col -= cd;
+                }
+
+                //insert(ri - rd, ci - cd);
+                row = ri;
+                col = ci;
+                while (insert(row, col))
+                {
+                    row += rd;
+                    col += cd;
+                }
+            }
+        }
+    }
+
+    return nodes.size();
 }
 
 
-// vector<tuple<Args...>>
-//auto lines = aoc::read_lines<int,int,int,int>(filename, R"((\d+)-(\d+),(\d+)-(\d+))");
-
-// vector<string>    
-//auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
-
-// Replace all substrings matching "search" with "replace".
-//std::string replace(std::string source, const std::string& search, const std::string& replace);
-
-// Split a delimited string of tokens into a vector of string tokens. Trims substrings by default and drops trimmed 
-// tokens which are empty by default. Not convinced how useful the option are, but you never know.
-//std::vector<std::string> split(std::string source, std::string delim, Blanks allow_blanks = Blanks::Suppress, Trim trim_subs = Trim::Yes);
-
-// vector (size_type n, const value_type& val = value_type(),
-//vector<int> row(COLS, 0);
-//vector<vector<int>> grid(ROWS, row);
 void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
+    int rows = lines.size();
+    int cols = lines[0].size();
 
-    auto p1 = part1(lines);
+    map<char, vector<pair<int, int>>> freqs;
+
+    for (auto r: aoc::range(rows))
+    {
+        for (auto c: aoc::range(cols))
+        {
+            if (lines[r][c] == '.') continue;
+
+            auto& locs = freqs[lines[r][c]];
+            locs.push_back(make_pair(r, c));
+        }
+    }
+
+    auto p1 = part1(freqs, rows, cols);
     cout << "Part1: " << p1 << '\n';
     
-
-    auto p2 = part2(lines);
+    auto p2 = part2(freqs, rows, cols);
     cout << "Part2: " << p2 << '\n';
-    
 }
 
 

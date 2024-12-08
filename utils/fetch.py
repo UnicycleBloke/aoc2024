@@ -35,15 +35,15 @@ def main():
     if len(args) == 0:
         raise "Provide a day number"
 
-    AOC_COOKIE = open('cookie.txt').readlines()[0].strip()
-
-    year       = AOC_YEAR
     day        = int(args[0])
-    input_url  = "https://adventofcode.com/%d/day/%d/input" % (year, day)
     input_path = Path(sys.argv[0]).parent.parent / ("day%02d" % day) / "input.txt"    
 
     # We don't want to spam the server. The input never changes for a given cookie.
     if not input_path.exists():
+        AOC_COOKIE = open('cookie.txt').readlines()[0].strip()
+        year       = AOC_YEAR
+        input_url  = "https://adventofcode.com/%d/day/%d/input" % (year, day)
+
         print("Fetching input data from:", input_url)
         cookies = {"session": AOC_COOKIE}
         content = requests.get(input_url, cookies=cookies).content
