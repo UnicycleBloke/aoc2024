@@ -59,10 +59,9 @@ auto part1(const T& input)
 
 struct Block
 {
-    int    id{}; // -1 is free;
-    int    size{};
+    size_t index{}; 
+    size_t size{};
     size_t base{};
-    bool   ignore{};
 };
 
 
@@ -71,99 +70,61 @@ auto part2(T& input)
 {
     aoc::timer timer;
 
-    int         file{};    
-    list<Block> blocks;
+    size_t        index{};    
+    vector<Block> files;
+    vector<Block> spaces;
 
-    size_t pos{};
-    size_t off{};
-    while (pos < input[0].size())
+    //files.reserve(50000);
+    //spaces.reserve(50000);
+
+    // Create the data
+    size_t p{};
+    size_t base{};
+    while (p < input[0].size())
     {
-        auto len = input[0][pos] - '0';
-        if ((pos % 2) == 0)
+        size_t size = input[0][p] - '0';
+        if ((p % 2) == 0)
         {
-            blocks.push_back(Block{file, len, off});
-            ++file;
+            files.emplace_back(Block{index, size, base});
+            ++index;
         }
         else
         {
-            blocks.push_back(Block{-1, len, off});
+            spaces.emplace_back(Block{0, size, base});
         }
-        ++pos; 
-        off += len;
+        ++p; 
+        base += size;
     }
 
-    //for (auto i: aoc::range(10))
-    auto rev = blocks.rbegin();
-    while (true)
+    // Perform the defrag
+    for (auto it = files.rbegin(); it != files.rend(); ++it)
     {
-        while ((rev != blocks.rend()) && ((rev->id == -1) || rev->ignore))
-            rev++;
-        if (rev == blocks.rend()) break;
-
-        auto fwd = blocks.begin();
-        while ((fwd != blocks.end()) && ((fwd->id != -1) || (fwd->size < rev->size))) 
+        auto& file = *it;
+        for (auto& space: spaces)
         {
-            fwd++;
-        }
-        if (fwd == blocks.end())
-        {  
-            rev->ignore = true;
-            continue;
-        }
-        if (rev->base < fwd->base)
-        {
-            rev->ignore = true;
-            continue;
-        }
-
-        Block file = *rev;
-        file.ignore = true;
-        file.base   = fwd->base;
-        blocks.insert(fwd, file);
-
-        rev->id     = -2;
-        rev->ignore = true;
-
-        fwd->size -= file.size;
-        fwd->base += file.size;
-        if (fwd->size == 0)
-            blocks.erase(fwd);
-
-        // Coalesce unused blocks
-        auto next = blocks.begin();
-        auto prev = next;
-        ++next;
-        while (next != blocks.end())
-        {
-            if ((prev->id < 0) && (next->id < 0))
+            if ((space.size >= file.size) && (space.base < file.base))
             {
-                next->size += prev->size;
-                prev->size  = 0;
+                file.base   = space.base;
+                space.base += file.size;
+                space.size -= file.size;
             }
-            prev = next;
-            ++next;
         }
     }
 
-    int64_t result{};
-    int     index{};
-    for (const auto& b: blocks)
-    {        
-        for (auto j: aoc::range(b.size))
-        {
-            if (b.id >= 0) result += index * b.id;
-            ++index; 
-        }
-    } 
+    // Calculate the result
+    size_t total{};    
+    for (auto& file: files)
+    {
+        total += file.index * (file.base * file.size + (file.size - 1) * file.size / 2);
+    }
 
-    return result;
+    return total;
 }
 
 
 void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
-    //cout << lines[0].size();
 
     auto p1 = part1(lines);
     cout << "Part1: " << p1 << '\n';
@@ -176,7 +137,7 @@ void run(const char* filename)
 int main(int argc, char** argv)
 {
     aoc::timer timer;
-    //try
+    try
     {
         if (argc < 2)
         {
@@ -193,8 +154,8 @@ int main(int argc, char** argv)
 
         run(argv[1]);
     }
-    // catch (std::exception& e)
-    // {
-    //     cout << e.what();
-    // }
+    catch (std::exception& e)
+    {
+        cout << e.what();
+    }
 }
