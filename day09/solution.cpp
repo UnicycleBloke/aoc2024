@@ -118,51 +118,61 @@ auto part2(T& input)
     }
 
 
-    for (auto i: aoc::range(10))
-    //while (true)
+    //for (auto i: aoc::range(10))
+    while (true)
     {
         auto rev = blocks.rbegin();
         while ((rev != blocks.rend()) && ((rev->id == -1) || rev->ignore))
             rev++;
         if (rev == blocks.rend()) break;
-        cout << "rev " << rev->id << " " << rev->size << " " << (rev != blocks.rend()) << endl;
+        //cout << "rev " << rev->id << " sz=" << rev->size << " end=" << (rev != blocks.rend()) << endl;
 
         auto fwd = blocks.begin();
-        while ((fwd != blocks.end()) && ((fwd->id != -1) || (fwd->size < rev->size)))
+        while ((fwd != blocks.end()) && ((fwd->id != -1) || (fwd->size < rev->size))) // || fwd->ignore)))
         {
-            cout << "fwd " << fwd->id << " " << fwd->size << " " << (fwd != blocks.end()) <<  endl;
+            //cout << "fwd " << fwd->id << " sz=" << fwd->size << " end=" << (fwd != blocks.end()) <<  endl;
             fwd++;
         }
-
-        if (fwd != blocks.end())
-        {           
-            Block file = *rev;
-            file.ignore = true;
-            blocks.insert(fwd, file);
-
-            rev->id = -1;
-
-            fwd->size -= file.size;
-            if (fwd->size == 0)
-                blocks.erase(fwd);
-        }
-        else
-        {
+        //cout << "fwd " << fwd->id << " sz=" << fwd->size << " end=" << (fwd != blocks.end()) <<  endl;
+        if (fwd == blocks.end())
+        {  
+            //cout << "skip file" << endl;
             rev->ignore = true;
+            continue;
         }
 
-        for (const auto& b: blocks)
-        {
-            cout << b.id << " " << b.size << endl; 
-        }
+        Block file = *rev;
+        file.ignore = true;
+        blocks.insert(fwd, file);
+
+        rev->id     = -2;
+        rev->ignore = true;
+
+        fwd->size -= file.size;
+        if (fwd->size == 0)
+            blocks.erase(fwd);
+
+        // for (const auto& b: blocks)
+        // {
+        //     char c = (b.id < 0) ? '.' : '0' + b.id;
+        //     for (auto j: aoc::range(b.size))
+        //         cout << c;
+        // }
+        //cout << endl;
     }
 
+    int64_t result{};
+    int     index{};
     for (const auto& b: blocks)
-    {
-        cout << b.id << " " << b.size << endl; 
-    }
+    {        
+        for (auto j: aoc::range(b.size))
+        {
+            if (b.id >= 0) result += index * b.id;
+            ++index; 
+        }
+    } 
 
-    return 0;
+    return result;
 }
 
 
