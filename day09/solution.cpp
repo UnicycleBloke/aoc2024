@@ -74,9 +74,6 @@ auto part2(T& input)
     vector<Block> files;
     vector<Block> spaces;
 
-    //files.reserve(50000);
-    //spaces.reserve(50000);
-
     // Create the data
     size_t p{};
     size_t base{};
@@ -156,6 +153,6 @@ int main(int argc, char** argv)
     }
     catch (std::exception& e)
     {
-        cout << e.what();
+       cout << e.what();
     }
 }
