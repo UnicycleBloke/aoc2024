@@ -118,8 +118,7 @@ auto part2(T& input)
 
 
     
-    //while (true)
-    for (auto i: aoc::range(3))
+    while (true)
     {
         auto rev = blocks.rbegin();
         while ((rev != blocks.rend()) && (rev->id == -1))
@@ -128,7 +127,7 @@ auto part2(T& input)
         cout << "rev " << rev->id << " " << rev->size << endl;
 
         auto fwd = blocks.begin();
-        while ((fwd != blocks.end()) && (fwd->id != -1))// && (fwd->size < rev->size))
+        while ((fwd != blocks.end()) && ((fwd->id != -1) || (fwd->size < rev->size)))
             fwd++;
         if (fwd == blocks.end()) break;
         cout << "fwd " << fwd->id << " " << fwd->size << endl;
