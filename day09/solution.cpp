@@ -82,8 +82,9 @@ auto part1(const T& input)
 
 struct Block
 {
-    int id; // -1 is free;
-    int size;
+    int id{}; // -1 is free;
+    int size{};
+    bool ignore{};
 };
 
 
@@ -116,39 +117,43 @@ auto part2(T& input)
         cout << b.id << " " << b.size << endl; 
     }
 
-   
-    auto rev = blocks.rbegin();
-    for (auto i: aoc::range(20))
+
+    for (auto i: aoc::range(10))
     //while (true)
     {
-        while ((rev != blocks.rend()) && (rev->id == -1))
+        auto rev = blocks.rbegin();
+        while ((rev != blocks.rend()) && ((rev->id == -1) || rev->ignore))
             rev++;
         if (rev == blocks.rend()) break;
-        cout << "rev " << rev->id << " " << rev->size << endl;
+        cout << "rev " << rev->id << " " << rev->size << " " << (rev != blocks.rend()) << endl;
 
         auto fwd = blocks.begin();
         while ((fwd != blocks.end()) && ((fwd->id != -1) || (fwd->size < rev->size)))
+        {
+            cout << "fwd " << fwd->id << " " << fwd->size << " " << (fwd != blocks.end()) <<  endl;
             fwd++;
-        cout << "fwd " << fwd->id << " " << fwd->size << endl;
+        }
 
         if (fwd != blocks.end())
         {           
             Block file = *rev;
-            fwd->size -= rev->size;
-            rev->id    = -1;
+            file.ignore = true;
+            blocks.insert(fwd, file);
+
+            rev->id = -1;
+
+            fwd->size -= file.size;
             if (fwd->size == 0)
-            {
-                fwd->id = file.id;
-                fwd->size = file.size;
-            }
-            else
-            {
-                blocks.insert(fwd, file);
-            }
+                blocks.erase(fwd);
         }
         else
         {
-            ++rev;
+            rev->ignore = true;
+        }
+
+        for (const auto& b: blocks)
+        {
+            cout << b.id << " " << b.size << endl; 
         }
     }
 
