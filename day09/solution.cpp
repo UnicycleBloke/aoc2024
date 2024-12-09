@@ -118,9 +118,9 @@ auto part2(T& input)
 
 
     
+    auto rev = blocks.rbegin();
     while (true)
     {
-        auto rev = blocks.rbegin();
         while ((rev != blocks.rend()) && (rev->id == -1))
             rev++;
         if (rev == blocks.rend()) break;
@@ -129,13 +129,15 @@ auto part2(T& input)
         auto fwd = blocks.begin();
         while ((fwd != blocks.end()) && ((fwd->id != -1) || (fwd->size < rev->size)))
             fwd++;
-        if (fwd == blocks.end()) break;
         cout << "fwd " << fwd->id << " " << fwd->size << endl;
 
-        Block file = *rev;
-        fwd->size -= rev->size;
-        rev->id    = -1;
-        blocks.insert(fwd, file);
+        if (fwd != blocks.end())
+        {
+            Block file = *rev;
+            fwd->size -= rev->size;
+            rev->id    = -1;
+            blocks.insert(fwd, file);
+        }
     }
 
     for (const auto& b: blocks)
