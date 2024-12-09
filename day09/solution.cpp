@@ -116,10 +116,10 @@ auto part2(T& input)
         cout << b.id << " " << b.size << endl; 
     }
 
-
-    
+   
     auto rev = blocks.rbegin();
-    while (true)
+    for (auto i: aoc::range(20))
+    //while (true)
     {
         while ((rev != blocks.rend()) && (rev->id == -1))
             rev++;
@@ -132,11 +132,23 @@ auto part2(T& input)
         cout << "fwd " << fwd->id << " " << fwd->size << endl;
 
         if (fwd != blocks.end())
-        {
+        {           
             Block file = *rev;
             fwd->size -= rev->size;
             rev->id    = -1;
-            blocks.insert(fwd, file);
+            if (fwd->size == 0)
+            {
+                fwd->id = file.id;
+                fwd->size = file.size;
+            }
+            else
+            {
+                blocks.insert(fwd, file);
+            }
+        }
+        else
+        {
+            ++rev;
         }
     }
 
