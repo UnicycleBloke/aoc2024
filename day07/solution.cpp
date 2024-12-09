@@ -97,7 +97,7 @@ auto part1(const T& input)
 
 
 template <typename T>
-auto part2(T& input)
+auto part2(const T& input)
 {
     aoc::timer timer;
 
@@ -111,7 +111,7 @@ auto part2(T& input)
 }
 
 template <typename T>
-auto part3(T& input)
+auto part3(const T& input)
 {
     aoc::timer timer;
 
@@ -264,7 +264,10 @@ void run(const char* filename)
         equations.push_back(move(e));
     }
 
+    auto p2 = part2(equations);
+    auto p2b = part3(equations);
     auto p1 = part1(equations);
+
     cout << "Part1: " << p1 << '\n';
 
     //auto p1r = part1_rust(equations);
@@ -273,10 +276,8 @@ void run(const char* filename)
     //auto p1m = part1_matt(equations);
     //cout << "Part1 Matt: " << p1m << '\n';
 
-    auto p2 = part2(equations);
     cout << "Part2: " << p2 << '\n';
 
-    auto p2b = part3(equations);
     cout << "Part2b: " << p2b << '\n';
    
     //auto p2r = part2(equations);
@@ -286,6 +287,8 @@ void run(const char* filename)
 
 int main(int argc, char** argv)
 {
+    std::ios::sync_with_stdio(false);
+
     aoc::timer timer;
     //try
     {

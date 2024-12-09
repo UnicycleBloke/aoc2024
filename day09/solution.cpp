@@ -25,15 +25,10 @@ auto part1(const T& input)
         ++pos; 
     }
 
-    // for (auto i: blocks)
-    //     cout << i;
-    // cout << endl;
-
     int beg  = 0;
     int end  = blocks.size() - 1;
     int size = blocks.size();
 
-    //while ((end > 0) && (beg < size))
     while (end > beg)
     {
         while ((beg < size) && (blocks[beg] != -1))
@@ -51,24 +46,6 @@ auto part1(const T& input)
         }
     }
 
-    // cout << "b=" << beg << " e=" << end << endl;
-    // cout << "b=" << blocks[beg] << " e=" << blocks[end] << endl;
-    // cout << "_123456789_123456789_123456789_123456789_123456789" << endl;
-
-    // for (auto i: blocks)
-    //     cout << i;
-    // cout << endl;
-
-    // for (auto i: aoc::range(blocks.size()))
-    // {
-    //     if (blocks[i] == -1) 
-    //         cout << '.';
-    //     else 
-    //         cout << blocks[i];
-    // }
-    // cout << endl;
-
-
     int64_t result{};
     for (auto i: aoc::range(blocks.size()))
     {
@@ -82,9 +59,10 @@ auto part1(const T& input)
 
 struct Block
 {
-    int id{}; // -1 is free;
-    int size{};
-    bool ignore{};
+    int    id{}; // -1 is free;
+    int    size{};
+    size_t base{};
+    bool   ignore{};
 };
 
 
@@ -97,68 +75,74 @@ auto part2(T& input)
     list<Block> blocks;
 
     size_t pos{};
+    size_t off{};
     while (pos < input[0].size())
     {
         auto len = input[0][pos] - '0';
         if ((pos % 2) == 0)
         {
-            blocks.push_back(Block{file, len});
+            blocks.push_back(Block{file, len, off});
             ++file;
         }
         else
         {
-            blocks.push_back(Block{-1, len});
+            blocks.push_back(Block{-1, len, off});
         }
         ++pos; 
+        off += len;
     }
-
-    for (const auto& b: blocks)
-    {
-        cout << b.id << " " << b.size << endl; 
-    }
-
 
     //for (auto i: aoc::range(10))
+    auto rev = blocks.rbegin();
     while (true)
     {
-        auto rev = blocks.rbegin();
         while ((rev != blocks.rend()) && ((rev->id == -1) || rev->ignore))
             rev++;
         if (rev == blocks.rend()) break;
-        //cout << "rev " << rev->id << " sz=" << rev->size << " end=" << (rev != blocks.rend()) << endl;
 
         auto fwd = blocks.begin();
-        while ((fwd != blocks.end()) && ((fwd->id != -1) || (fwd->size < rev->size))) // || fwd->ignore)))
+        while ((fwd != blocks.end()) && ((fwd->id != -1) || (fwd->size < rev->size))) 
         {
-            //cout << "fwd " << fwd->id << " sz=" << fwd->size << " end=" << (fwd != blocks.end()) <<  endl;
             fwd++;
         }
-        //cout << "fwd " << fwd->id << " sz=" << fwd->size << " end=" << (fwd != blocks.end()) <<  endl;
         if (fwd == blocks.end())
         {  
-            //cout << "skip file" << endl;
+            rev->ignore = true;
+            continue;
+        }
+        if (rev->base < fwd->base)
+        {
             rev->ignore = true;
             continue;
         }
 
         Block file = *rev;
         file.ignore = true;
+        file.base   = fwd->base;
         blocks.insert(fwd, file);
 
         rev->id     = -2;
         rev->ignore = true;
 
         fwd->size -= file.size;
+        fwd->base += file.size;
         if (fwd->size == 0)
             blocks.erase(fwd);
 
-        // for (const auto& b: blocks)
-        // {
-        //     char c = (b.id < 0) ? '.' : '0' + b.id;
-        //     for (auto j: aoc::range(b.size))
-        //         cout << c;
-        // }
-        //cout << endl;
+        // Coalesce unused blocks
+        auto next = blocks.begin();
+        auto prev = next;
+        ++next;
+        while (next != blocks.end())
+        {
+            if ((prev->id < 0) && (next->id < 0))
+            {
+                next->size += prev->size;
+                prev->size  = 0;
+            }
+            prev = next;
+            ++next;
+        }
     }
 
     int64_t result{};
