@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
+#set(CMAKE_CXX_COMPILER "/usr/bin/clang")
+
 project("aoc2024")
 
 add_subdirectory(utils)
