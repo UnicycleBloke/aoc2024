@@ -60,30 +60,6 @@ bool could_be_true2(const Equation& e, uint64_t result, int index)
 
 
 
-// Recursive trinary search.
-bool could_be_true3(uint64_t target, const uint64_t* operands, int numops, uint64_t result, int index)
-{
-    // Condition reduces part2 execution time.
-    if (result > target) return false;
-
-    if (index == numops)
-        return target == result;
-    
-    // Return early rather than evaluate further. Cheaper operator first.
-    if (could_be_true3(target, operands, numops, result + operands[index], index + 1)) return true;
-    if (could_be_true3(target, operands, numops, result * operands[index], index + 1)) return true;
-
-    // Concatentation operator.
-    auto temp = operands[index];
-    while (temp > 0)
-    {
-        result *= 10;
-        temp   /= 10;
-    }
-    return could_be_true3(target, operands, numops, result + operands[index], index + 1);
-}
-
-
 template <typename T>
 auto part1(const T& input)
 {
@@ -114,23 +90,75 @@ auto part2_cpp(const T& input)
 }
 
 
-bool is_valid2(uint64_t result, span<const uint32_t> operands)     
+// This was translated from a *much* faster Rust algorithm. I somehow mistimed it and 
+// got a comparable duration to my algo. There followed much confusion and desparate
+// attempts to work out why the C++ was an order of magnitude slower than Rust. They 
+// should be comparable. Nothing obviously wrong in my code. It turns out (when someone
+// tried it and didn't mistime it), that the Rust algo is just far better at pruning
+// the search space. 
+//
+// I didn't commit the code which caused so much confusion but, strangely, the version
+// of the translated algo which I shared on Godbolt (the function below) was absolutely
+// fine. I'm baffled by how I mistimed it on my machine before but now it works as expected.
+// More haste less speed. Too much belief in an erroneous result. Oh well. 
+//
+// I used span to simulate Rust slices, but this wasn't a factor. Or at least not a major one.
+// Non-span version below.
+// bool is_valid2(uint64_t result, span<const uint32_t> operands)     
+// {
+//     ++calls_rust;
+
+//     auto l = operands.size();
+//     if (l == 1) {
+//         return result == operands[0];
+//     }
+//     uint32_t last = operands[l - 1];
+//     if (result % last == 0) {
+//         if (is_valid2(result / last, span<const uint32_t>(operands.begin(), operands.end() - 1))) {
+//             return true;
+//         }
+//     }
+//     auto sub = result - last;
+//     if (sub >= 0) {
+//         if (is_valid2(sub, span<const uint32_t>(operands.begin(), operands.end() - 1))) {
+//             return true;
+//         }
+
+//         auto p = 10;       
+//         // Inlined the Rust code for this bit
+//         uint32_t temp = last;
+//         while (temp >= 10) {
+//             p    *= 10;
+//             temp /= 10;
+//         }
+//         if (sub % p == 0) {
+//             if (is_valid2(sub / p, span<const uint32_t>(operands.begin(), operands.end() - 1))) {
+//                 return true;
+//             }
+//         }
+//     }
+
+//     return false;
+// }
+
+
+bool is_valid2(const vector<uint32_t>& operands, uint64_t result, int index)
 {
     ++calls_rust;
 
-    auto l = operands.size();
+    auto l = operands.size() - index;
     if (l == 1) {
         return result == operands[0];
     }
     uint32_t last = operands[l - 1];
     if (result % last == 0) {
-        if (is_valid2(result / last, span<const uint32_t>(operands.begin(), operands.end() - 1))) {
+        if (is_valid2(operands, result / last, index + 1)) {
             return true;
         }
     }
     auto sub = result - last;
     if (sub >= 0) {
-        if (is_valid2(sub, span<const uint32_t>(operands.begin(), operands.end() - 1))) {
+        if (is_valid2(operands, sub, index + 1)) {
             return true;
         }
 
@@ -142,7 +170,7 @@ bool is_valid2(uint64_t result, span<const uint32_t> operands)
             temp /= 10;
         }
         if (sub % p == 0) {
-            if (is_valid2(sub / p, span<const uint32_t>(operands.begin(), operands.end() - 1))) {
+            if (is_valid2(operands, sub / p, index + 1)) {
                 return true;
             }
         }
@@ -152,30 +180,16 @@ bool is_valid2(uint64_t result, span<const uint32_t> operands)
 }
 
 
-// template <typename T>
-// auto part2_rust(const T& input)
-// {
-//     aoc::timer timer;
-
-//     uint64_t total{};
-//     for (const auto& e: input)
-//     {
-//         if (could_be_true2(e, e.operands[0], 1)) total += e.result;
-//     }
-
-//     return total;
-// }
-
-
-uint64_t part2_rust(const vector<Equation>& equations) 
+template <typename T>
+auto part2_rust(const T& input)
 {
     aoc::timer timer;
 
     // Not too familiar with ranges/views, so used a boring old loop.
     uint64_t total{};
-    for (const auto& [result, operands]: equations)
+    for (const auto& [result, operands]: input)
     {
-        if (is_valid2(result, span<const uint32_t>{operands})) total += result;
+        if (is_valid2(operands, result, 0)) total += result;
     }
     return total;
 }
@@ -199,10 +213,10 @@ void run(const char* filename)
     cout << "Part1: " << p1 << '\n';
 
     auto p2a = part2_cpp(equations);
-    cout << "Part2: " << p2a << " " << calls_cpp << '\n';
+    cout << "Part2 (My algo):   " << p2a << " calls=" << calls_cpp << '\n';
 
     auto p2b = part2_rust(equations);
-    cout << "Part2: " << p2b << " " << calls_rust << '\n';
+    cout << "Part2 (Rust algo): " << p2b << " calls=" << calls_rust << '\n';
 }
 
 
