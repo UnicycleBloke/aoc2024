@@ -2,10 +2,137 @@
 
 
 template <typename T>
+auto count_trails(const T& input, int r, int c)
+{
+    const int Rows = input.size();
+    const int Cols = input[0].size();
+
+    auto in_bounds = [&](int row, int col)
+    {
+        return(row >= 0) && (row < Rows) && (col >= 0) && (col < Cols);
+    };
+
+    int heads = 0;
+
+    // Use a set to avoid double duplicating locations on multiple trails.
+    using Head = pair<int, int>;
+    set<Head> trails;
+    trails.insert(Head{r, c});
+
+    while (true)
+    {        
+        set<Head> trails2;
+        for (auto [r1, c1]: trails)
+        {
+            if (input[r1][c1] == '9') 
+            {
+                ++heads;
+                continue;
+            }
+
+            int r2 = r1 + 1;
+            int c2 = c1;
+            if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
+                trails2.insert(Head{r2, c2});
+
+            r2 = r1 - 1;
+            c2 = c1;
+            if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
+                trails2.insert(Head{r2, c2});
+
+            r2 = r1;
+            c2 = c1 + 1;
+            if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
+                trails2.insert(Head{r2, c2});
+
+            r2 = r1;
+            c2 = c1 - 1;
+            if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
+                trails2.insert(Head{r2, c2});
+        }
+
+        if (trails2.size() == 0) break;
+        trails = trails2;
+    }
+
+    return heads;    
+}
+
+
+template <typename T>
+auto count_trails2(const T& input, int r, int c)
+{
+    const int Rows = input.size();
+    const int Cols = input[0].size();
+
+    auto in_bounds = [&](int row, int col)
+    {
+        return(row >= 0) && (row < Rows) && (col >= 0) && (col < Cols);
+    };
+
+    int heads = 0;
+
+    // Use a vector to duplicate locations on multiple trails.
+    using Head = pair<int, int>;
+    vector<Head> trails;
+    trails.push_back(Head{r, c});
+
+    while (true)
+    {        
+        vector<Head> trails2;
+        for (auto [r1, c1]: trails)
+        {
+            if (input[r1][c1] == '9') 
+            {
+                ++heads;
+                continue;
+            }
+
+            int r2 = r1 + 1;
+            int c2 = c1;
+            if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
+                trails2.push_back(Head{r2, c2});
+
+            r2 = r1 - 1;
+            c2 = c1;
+            if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
+                trails2.push_back(Head{r2, c2});
+
+            r2 = r1;
+            c2 = c1 + 1;
+            if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
+                trails2.push_back(Head{r2, c2});
+
+            r2 = r1;
+            c2 = c1 - 1;
+            if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
+                trails2.push_back(Head{r2, c2});
+        }
+
+        if (trails2.size() == 0) break;
+        trails = trails2;
+    }
+
+    return heads;    
+}
+
+
+template <typename T>
 auto part1(const T& input)
 {
     aoc::timer timer;
-    return 0;
+
+    int trails = 0;
+    for (auto r: aoc::range(input.size()))
+    {
+        for (auto c: aoc::range(input[0].size()))
+        {
+            if (input[r][c] == '0')
+                trails += count_trails(input, r, c);        
+        }
+    }
+
+    return trails;
 }
 
 
@@ -13,26 +140,21 @@ template <typename T>
 auto part2(T& input)
 {
     aoc::timer timer;
-    return 0;
+
+    int trails = 0;
+    for (auto r: aoc::range(input.size()))
+    {
+        for (auto c: aoc::range(input[0].size()))
+        {
+            if (input[r][c] == '0')
+                trails += count_trails2(input, r, c);        
+        }
+    }
+
+    return trails;
 }
 
 
-// vector<tuple<Args...>>
-//auto lines = aoc::read_lines<int,int,int,int>(filename, R"((\d+)-(\d+),(\d+)-(\d+))");
-
-// vector<string>    
-//auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
-
-// Replace all substrings matching "search" with "replace".
-//std::string replace(std::string source, const std::string& search, const std::string& replace);
-
-// Split a delimited string of tokens into a vector of string tokens. Trims substrings by default and drops trimmed 
-// tokens which are empty by default. Not convinced how useful the option are, but you never know.
-//std::vector<std::string> split(std::string source, std::string delim, Blanks allow_blanks = Blanks::Suppress, Trim trim_subs = Trim::Yes);
-
-// vector (size_type n, const value_type& val = value_type(),
-//vector<int> row(COLS, 0);
-//vector<vector<int>> grid(ROWS, row);
 void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 

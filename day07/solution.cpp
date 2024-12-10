@@ -1,10 +1,11 @@
 #include "utils.h"
+#include <span>
 
 
 struct Equation
 {
     uint64_t result{};
-    vector<uint64_t> operands{};
+    vector<uint32_t> operands{};
 
     Equation() = default;
     Equation(const Equation&) = delete;
@@ -13,6 +14,9 @@ struct Equation
     Equation& operator=(Equation&&) = default;
 };
 
+
+int calls_cpp{};
+int calls_rust{};
 
 // Recursive binary search.
 bool could_be_true(const Equation& e, uint64_t result, int index)
@@ -32,6 +36,8 @@ bool could_be_true(const Equation& e, uint64_t result, int index)
 // Recursive trinary search.
 bool could_be_true2(const Equation& e, uint64_t result, int index)
 {
+    ++calls_cpp;
+
     // Condition reduces part2 execution time.
     if (result > e.result) return false;
 
@@ -94,7 +100,7 @@ auto part1(const T& input)
 
 
 template <typename T>
-auto part2(const T& input)
+auto part2_cpp(const T& input)
 {
     aoc::timer timer;
 
@@ -104,6 +110,73 @@ auto part2(const T& input)
         if (could_be_true2(e, e.operands[0], 1)) total += e.result;
     }
 
+    return total;
+}
+
+
+bool is_valid2(uint64_t result, span<const uint32_t> operands)     
+{
+    ++calls_rust;
+
+    auto l = operands.size();
+    if (l == 1) {
+        return result == operands[0];
+    }
+    uint32_t last = operands[l - 1];
+    if (result % last == 0) {
+        if (is_valid2(result / last, span<const uint32_t>(operands.begin(), operands.end() - 1))) {
+            return true;
+        }
+    }
+    auto sub = result - last;
+    if (sub >= 0) {
+        if (is_valid2(sub, span<const uint32_t>(operands.begin(), operands.end() - 1))) {
+            return true;
+        }
+
+        auto p = 10;       
+        // Inlined the Rust code for this bit
+        uint32_t temp = last;
+        while (temp >= 10) {
+            p    *= 10;
+            temp /= 10;
+        }
+        if (sub % p == 0) {
+            if (is_valid2(sub / p, span<const uint32_t>(operands.begin(), operands.end() - 1))) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+// template <typename T>
+// auto part2_rust(const T& input)
+// {
+//     aoc::timer timer;
+
+//     uint64_t total{};
+//     for (const auto& e: input)
+//     {
+//         if (could_be_true2(e, e.operands[0], 1)) total += e.result;
+//     }
+
+//     return total;
+// }
+
+
+uint64_t part2_rust(const vector<Equation>& equations) 
+{
+    aoc::timer timer;
+
+    // Not too familiar with ranges/views, so used a boring old loop.
+    uint64_t total{};
+    for (const auto& [result, operands]: equations)
+    {
+        if (is_valid2(result, span<const uint32_t>{operands})) total += result;
+    }
     return total;
 }
 
@@ -118,15 +191,18 @@ void run(const char* filename)
         auto s = aoc::split(line, ":");
         Equation e;
         e.result = stoll(s[0]);
-        e.operands = aoc::make_vector<uint64_t>(s[1], " ");
+        e.operands = aoc::make_vector<uint32_t>(s[1], " ");
         equations.push_back(move(e));
     }
 
     auto p1 = part1(equations);
     cout << "Part1: " << p1 << '\n';
 
-    auto p2 = part2(equations);
-    cout << "Part2: " << p2 << '\n';
+    auto p2a = part2_cpp(equations);
+    cout << "Part2: " << p2a << " " << calls_cpp << '\n';
+
+    auto p2b = part2_rust(equations);
+    cout << "Part2: " << p2b << " " << calls_rust << '\n';
 }
 
 
