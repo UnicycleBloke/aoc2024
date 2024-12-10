@@ -1,7 +1,7 @@
 #include "utils.h"
 
 
-template <typename T>
+template <typename T, template<typename> typename Container>
 auto count_trails(const T& input, int r, int c)
 {
     const int Rows = input.size();
@@ -14,72 +14,21 @@ auto count_trails(const T& input, int r, int c)
 
     int heads = 0;
 
-    // Use a set to avoid double duplicating locations on multiple trails.
     using Head = pair<int, int>;
-    set<Head> trails;
-    trails.insert(Head{r, c});
-
-    while (true)
-    {        
-        set<Head> trails2;
-        for (auto [r1, c1]: trails)
-        {
-            if (input[r1][c1] == '9') 
-            {
-                ++heads;
-                continue;
-            }
-
-            int r2 = r1 + 1;
-            int c2 = c1;
-            if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
-                trails2.insert(Head{r2, c2});
-
-            r2 = r1 - 1;
-            c2 = c1;
-            if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
-                trails2.insert(Head{r2, c2});
-
-            r2 = r1;
-            c2 = c1 + 1;
-            if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
-                trails2.insert(Head{r2, c2});
-
-            r2 = r1;
-            c2 = c1 - 1;
-            if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
-                trails2.insert(Head{r2, c2});
-        }
-
-        if (trails2.size() == 0) break;
-        trails = trails2;
-    }
-
-    return heads;    
-}
-
-
-template <typename T>
-auto count_trails2(const T& input, int r, int c)
-{
-    const int Rows = input.size();
-    const int Cols = input[0].size();
-
-    auto in_bounds = [&](int row, int col)
+    auto append = [&](Container<Head>& cont, Head head)
     {
-        return(row >= 0) && (row < Rows) && (col >= 0) && (col < Cols);
+        if constexpr (is_same_v<Container<Head>, set<Head>>)
+            cont.insert(head);
+        else if constexpr (is_same_v<Container<Head>, vector<Head>>)
+            cont.push_back(head);
     };
 
-    int heads = 0;
-
-    // Use a vector to duplicate locations on multiple trails.
-    using Head = pair<int, int>;
-    vector<Head> trails;
-    trails.push_back(Head{r, c});
+    Container<Head> trails;
+    append(trails, Head{r, c});
 
     while (true)
     {        
-        vector<Head> trails2;
+        Container<Head> trails2;
         for (auto [r1, c1]: trails)
         {
             if (input[r1][c1] == '9') 
@@ -91,22 +40,22 @@ auto count_trails2(const T& input, int r, int c)
             int r2 = r1 + 1;
             int c2 = c1;
             if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
-                trails2.push_back(Head{r2, c2});
+                append(trails2, Head{r2, c2});
 
             r2 = r1 - 1;
             c2 = c1;
             if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
-                trails2.push_back(Head{r2, c2});
+                append(trails2, Head{r2, c2});
 
             r2 = r1;
             c2 = c1 + 1;
             if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
-                trails2.push_back(Head{r2, c2});
+                append(trails2, Head{r2, c2});
 
             r2 = r1;
             c2 = c1 - 1;
             if (in_bounds(r2, c2) && (input[r2][c2] - input[r1][c1] == 1))
-                trails2.push_back(Head{r2, c2});
+                append(trails2, Head{r2, c2});
         }
 
         if (trails2.size() == 0) break;
@@ -117,8 +66,9 @@ auto count_trails2(const T& input, int r, int c)
 }
 
 
-template <typename T>
-auto part1(const T& input)
+// Easy today, so I had a play with template template types to reduce code duplication.
+template <typename T, template<typename> typename Container>
+auto solve(const T& input)
 {
     aoc::timer timer;
 
@@ -128,26 +78,7 @@ auto part1(const T& input)
         for (auto c: aoc::range(input[0].size()))
         {
             if (input[r][c] == '0')
-                trails += count_trails(input, r, c);        
-        }
-    }
-
-    return trails;
-}
-
-
-template <typename T>
-auto part2(T& input)
-{
-    aoc::timer timer;
-
-    int trails = 0;
-    for (auto r: aoc::range(input.size()))
-    {
-        for (auto c: aoc::range(input[0].size()))
-        {
-            if (input[r][c] == '0')
-                trails += count_trails2(input, r, c);        
+                trails += count_trails<T, Container>(input, r, c);        
         }
     }
 
@@ -159,13 +90,13 @@ void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
 
-    auto p1 = part1(lines);
+    // Use a set to avoid double duplicating locations on multiple trails.
+    auto p1 = solve<decltype(lines), set>(lines);
     cout << "Part1: " << p1 << '\n';
-    
 
-    auto p2 = part2(lines);
+    // Use a vector to duplicate locations on multiple trails.  
+    auto p2 = solve<decltype(lines), vector>(lines);
     cout << "Part2: " << p2 << '\n';
-    
 }
 
 
