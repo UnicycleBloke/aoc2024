@@ -3,9 +3,15 @@
 
 uint64_t count_stones(vector<uint64_t> input, int blinks)
 {
+    // This reminds of the Lantern Fish problem.
+    //
+    // Original Part 1 used a vector but this just won't work for Part 2.
     // Fretted about keeping the stones in order, but this is a red herring. 
-    // We only care about how many stones we have with each number. This 
-    // reminds of the Lantern Fish problem.
+    // We only care about how many stones we have with each number. 
+    //    
+    // The numbers engraved get huge, as do the counts of stones with a given number.
+    // This seems to rule out an array or something hold the results. We end up with
+    // thousands of distinct numbers, scattered across the uint64_t range. Use a map. 
     map<uint64_t, uint64_t> stones;
     for (auto s: input)
     {
