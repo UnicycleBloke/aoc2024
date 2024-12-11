@@ -1,11 +1,74 @@
 #include "utils.h"
 
 
+uint64_t count_stones(vector<uint64_t> input, int blinks)
+{
+    // Fretted about keeping the stones in order, but this is a red herring. 
+    // We only care about how many stones we have with each number. This 
+    // reminds of the Lantern Fish problem.
+    map<uint64_t, uint64_t> stones;
+    for (auto s: input)
+    {
+        stones[s] = 1;
+    }
+
+    auto digits = [](uint64_t s)
+    {
+        int d = 0;
+        while (s > 0)
+        {
+            ++d;
+            s = s / 10; 
+        }
+        return d;
+    };
+
+    auto pow10 = [](int d)
+    {
+        uint64_t result = 1;
+        for (auto i: aoc::range(d)) result = result * 10;
+        return result;
+    };
+
+    for (auto blink: aoc::range(blinks))
+    {
+        // Implement the recurrence relation.
+        map<uint64_t, uint64_t> stones2;
+        for (auto [s, count]: stones)
+        {
+            if (s == 0)
+            {
+                stones2[1] = stones2[1] + count;
+            }
+            else if (int d = digits(s); (d % 2) == 0)
+            {
+                auto m = pow10(d/2);
+                stones2[s / m] = stones2[s / m] + count;
+                stones2[s % m] = stones2[s % m] + count;
+            }
+            else
+            {
+                auto s2 = s * 2024;
+                stones2[s2] = stones2[s2] + count;
+            } 
+        }
+
+        stones = stones2;
+    }
+
+    uint64_t total{};
+    for (auto [s, count]: stones)
+        total += count;
+
+    return total;
+}
+
+
 template <typename T>
-auto part1(const T& input)
+auto part1(T& input)
 {
     aoc::timer timer;
-    return 0;
+    return count_stones(input, 25);
 }
 
 
@@ -13,37 +76,20 @@ template <typename T>
 auto part2(T& input)
 {
     aoc::timer timer;
-    return 0;
+    return count_stones(input, 75);
 }
 
 
-// vector<tuple<Args...>>
-//auto lines = aoc::read_lines<int,int,int,int>(filename, R"((\d+)-(\d+),(\d+)-(\d+))");
-
-// vector<string>    
-//auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
-
-// Replace all substrings matching "search" with "replace".
-//std::string replace(std::string source, const std::string& search, const std::string& replace);
-
-// Split a delimited string of tokens into a vector of string tokens. Trims substrings by default and drops trimmed 
-// tokens which are empty by default. Not convinced how useful the option are, but you never know.
-//std::vector<std::string> split(std::string source, std::string delim, Blanks allow_blanks = Blanks::Suppress, Trim trim_subs = Trim::Yes);
-
-// vector (size_type n, const value_type& val = value_type(),
-//vector<int> row(COLS, 0);
-//vector<vector<int>> grid(ROWS, row);
 void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
+    auto input = aoc::make_vector<uint64_t>(lines[0], " ");
 
-    auto p1 = part1(lines);
-    cout << "Part1: " << p1 << '\n';
-    
+    auto p1 = part1(input);
+    cout << "Part1: " << p1 << '\n';   
 
-    auto p2 = part2(lines);
+    auto p2 = part2(input);
     cout << "Part2: " << p2 << '\n';
-    
 }
 
 
