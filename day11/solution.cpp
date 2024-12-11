@@ -12,10 +12,10 @@ uint64_t count_stones(vector<uint64_t> input, int blinks)
     // The numbers engraved get huge, as do the counts of stones with a given number.
     // This seems to rule out an array or something hold the results. We end up with
     // thousands of distinct numbers, scattered across the uint64_t range. Use a map. 
-    map<uint64_t, uint64_t> stones;
+    unordered_map<uint64_t, uint64_t> stones;
     for (auto s: input)
     {
-        stones[s] = 1;
+        stones[s] = stones[s] + 1;
     }
 
     auto digits = [](uint64_t s)
@@ -39,7 +39,7 @@ uint64_t count_stones(vector<uint64_t> input, int blinks)
     for (auto blink: aoc::range(blinks))
     {
         // Implement the recurrence relation.
-        map<uint64_t, uint64_t> stones2;
+        unordered_map<uint64_t, uint64_t> stones2;
         for (auto [s, count]: stones)
         {
             if (s == 0)
@@ -48,9 +48,11 @@ uint64_t count_stones(vector<uint64_t> input, int blinks)
             }
             else if (int d = digits(s); (d % 2) == 0)
             {
-                auto m = pow10(d/2);
-                stones2[s / m] = stones2[s / m] + count;
-                stones2[s % m] = stones2[s % m] + count;
+                auto m   = pow10(d/2);
+                auto div = s / m;
+                auto mod = s % m;
+                stones2[div] = stones2[div] + count;
+                stones2[mod] = stones2[mod] + count;
             }
             else
             {
@@ -64,7 +66,9 @@ uint64_t count_stones(vector<uint64_t> input, int blinks)
 
     uint64_t total{};
     for (auto [s, count]: stones)
+    {
         total += count;
+    }
 
     return total;
 }
