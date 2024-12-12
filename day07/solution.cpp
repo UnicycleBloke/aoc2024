@@ -254,15 +254,35 @@ void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
 
-    vector<Equation> equations;
-    for (const auto& line: lines)
+    vector<Equation> equations
     {
-        auto s = aoc::split(line, ":");
-        Equation e;
-        e.result = stoll(s[0]);
-        e.operands = aoc::make_vector<uint64_t>(s[1], " ");
-        equations.push_back(move(e));
-    }
+{305117254, { 610, 233, 5, 46, 710, }}, 
+{4312154929, { 960, 199, 9, 38, 66, 49, }}, 
+{10980, { 4, 9, 3, 8, 59, 5, 8, 64, 30, 2, }}, 
+{15196220, { 26, 494, 680, 256, 554, }}, 
+{1812500, { 876, 98, 996, 92, 2, 8, 72, }}, 
+{8654, { 791, 64, 9, 6, 8, }}, 
+{54194529, { 774, 2, 7, 510, 22, }}, 
+{3252600236, { 3, 18, 3, 6, 3, 5, 1, 1, 40, 236, }}, 
+{8778363545604, { 2, 844, 49, 8, 992, 635, 1, 4, }}, 
+    };
+    // for (const auto& line: lines)
+    // {
+    //     auto s = aoc::split(line, ":");
+    //     Equation e;
+    //     e.result = stoll(s[0]);
+    //     e.operands = aoc::make_vector<uint64_t>(s[1], " ");
+    //     equations.push_back(move(e));
+    // }
+
+    // for (const auto& e: equations)
+    // {
+    //     cout << "{" << e.result << ", { ";
+    //     for (auto v: e.operands) 
+    //         cout << v << ", ";
+    //     cout << "}}, " << endl;
+    // }
+    // cout << endl;
 
     auto p2 = part2(equations);
     auto p2b = part3(equations);
