@@ -99,9 +99,9 @@ auto part1(const T& input)
                 };
 
                 if (is_corner(row, col, +1, +1)) corners.insert({row+1, col+1});
-                if (is_corner(row, col, +1, -1)) corners.insert({row+1, col-1});
-                if (is_corner(row, col, -1, +1)) corners.insert({row-1, col+1});
-                if (is_corner(row, col, -1, -1)) corners.insert({row-1, col-1});
+                if (is_corner(row, col, +1, -1)) corners.insert({row+1, col});
+                if (is_corner(row, col, -1, +1)) corners.insert({row, col+1});
+                if (is_corner(row, col, -1, -1)) corners.insert({row, col});
             }
             region.corners = corners.size();
             cout << region.crop << " p=" << region.plots.size() << " f=" << region.fences << " c=" << region.corners << endl;
