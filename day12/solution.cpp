@@ -60,6 +60,7 @@ auto part1(const T& input)
                 plots = plots2;
             }
 
+            // Simple count of all the plot boundaries with a different crop on the other side. 
             for (auto [row, col]: region.plots)
             {
                 char cx = input[row][col];
@@ -69,7 +70,9 @@ auto part1(const T& input)
                 region.fences += input[row  ][col+1] != cx;
             }
 
+            // Count the corners of the region, which is the same as the number of edges. 
             set<pair<size_t, size_t>> corners;
+            set<pair<size_t, size_t>> specials;
             for (auto [row, col]: region.plots)
             {
                 auto is_corner = [&](size_t r0, size_t c0, int rdir, int cdir)
@@ -85,39 +88,52 @@ auto part1(const T& input)
                     return true;
                 };
 
+                auto is_special = [&](size_t r0, size_t c0, int rdir, int cdir)
+                {
+                    char cx  = input[r0][c0];
+                    char cn  = input[r0+rdir][c0];
+                    char cw  = input[r0][c0+cdir];
+                    char cnw = input[r0+rdir][c0+cdir];
+
+                    if (region.plots.find({r0+rdir, c0+cdir}) != region.plots.end())
+                    {
+                        return ((cx != cn) && (cx != cw) && (cx == cnw));
+                    }
+                    return false;
+                };
+
+                // Simple test to determine if any of the four corners of a plot in the region are 
+                // corners of the region. Keep these in a set to avoid double counting.
                 if (is_corner(row, col, +1, +1)) corners.insert({row+1, col+1});
                 if (is_corner(row, col, +1, -1)) corners.insert({row+1, col});
                 if (is_corner(row, col, -1, +1)) corners.insert({row, col+1});
                 if (is_corner(row, col, -1, -1)) corners.insert({row, col});
+
+                // Special case where two of a region's corners kiss. In this case we do need to count
+                // the location twice. I was thinking about how to walk the perimeter and count turns,
+                // but this turned out to be much simpler.
+                if (is_special(row, col, +1, +1)) specials.insert({row+1, col+1});
+                if (is_special(row, col, +1, -1)) specials.insert({row+1, col});
+                if (is_special(row, col, -1, +1)) specials.insert({row, col+1});
+                if (is_special(row, col, -1, -1)) specials.insert({row, col});
             }
-            region.corners = corners.size();
-            //cout << region.crop << " p=" << region.plots.size() << " f=" << region.fences << " c=" << region.corners << endl;
-            cout << region.crop << " p=" << region.plots.size() << " c=" << region.corners << " " << (region.corners*region.plots.size()) << endl;
+            region.corners = corners.size() + specials.size();
 
             regions.push_back(region);
         }
     }
-//        .... 
-// RRRRIIC.FF.
-// RRRRII...F.
-// VVRRRC.FFF.
-// VVRCCC.FFF.
-// VVVVCJ..F..
-// VVIVCCJ....
-// VVIIICJJEE
-// MIIIIIJJEE
-// MIIISIJEEE
-// MMMISSJEEE
 
-
-    size_t result{};
+    size_t result1{};
+    size_t result2{};
     for (const auto& reg: regions)
     {
-        //result += reg.fences * reg.plots.size();
-        result += reg.corners * reg.plots.size();
+        result1 += reg.fences * reg.plots.size();
+        result2 += reg.corners * reg.plots.size();
     }
+    cout << "Part1: " << result1 << endl;
+    cout << "Part2: " << result2 << endl;
 
-    return result;
+    return result2;
 }
 
 
@@ -129,22 +145,6 @@ auto part2(T& input)
 }
 
 
-// vector<tuple<Args...>>
-//auto lines = aoc::read_lines<int,int,int,int>(filename, R"((\d+)-(\d+),(\d+)-(\d+))");
-
-// vector<string>    
-//auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
-
-// Replace all substrings matching "search" with "replace".
-//std::string replace(std::string source, const std::string& search, const std::string& replace);
-
-// Split a delimited string of tokens into a vector of string tokens. Trims substrings by default and drops trimmed 
-// tokens which are empty by default. Not convinced how useful the option are, but you never know.
-//std::vector<std::string> split(std::string source, std::string delim, Blanks allow_blanks = Blanks::Suppress, Trim trim_subs = Trim::Yes);
-
-// vector (size_type n, const value_type& val = value_type(),
-//vector<int> row(COLS, 0);
-//vector<vector<int>> grid(ROWS, row);
 void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
