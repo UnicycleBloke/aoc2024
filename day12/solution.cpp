@@ -85,26 +85,14 @@ auto part1(const T& input)
                     return true;
                 };
 
-                auto is_nw_corner = [&](size_t r0, size_t c0)
-                {
-                    char cx  = input[r0][c0];
-                    char cn  = input[r0-1][c0];
-                    char cw  = input[r0][c0-1];
-                    char cnw = input[r0-1][c0-1];
-                    // Not a corner
-                    if ((cx == cn) && (cx == cw) && (cx == cnw)) return false;
-                    if ((cx == cn) && (cx != cw) && (cx != cnw)) return false;
-                    if ((cx != cn) && (cx == cw) && (cx != cnw)) return false;
-                    return true;
-                };
-
                 if (is_corner(row, col, +1, +1)) corners.insert({row+1, col+1});
                 if (is_corner(row, col, +1, -1)) corners.insert({row+1, col});
                 if (is_corner(row, col, -1, +1)) corners.insert({row, col+1});
                 if (is_corner(row, col, -1, -1)) corners.insert({row, col});
             }
             region.corners = corners.size();
-            cout << region.crop << " p=" << region.plots.size() << " f=" << region.fences << " c=" << region.corners << endl;
+            //cout << region.crop << " p=" << region.plots.size() << " f=" << region.fences << " c=" << region.corners << endl;
+            cout << region.crop << " p=" << region.plots.size() << " c=" << region.corners << " " << (region.corners*region.plots.size()) << endl;
 
             regions.push_back(region);
         }
