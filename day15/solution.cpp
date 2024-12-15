@@ -214,18 +214,6 @@ auto part2(T& input)
         }
     }      
 
-    // auto print = [&]()
-    // {
-    //     for (auto r: aoc::range(rows))
-    //     {
-    //         for (auto c: aoc::range(cols))
-    //             cout << grid[r][c];
-    //         cout << endl;
-    //     }
-    //     cout << endl;
-    // };
-
-    // print();
     for (auto move: moves)
     {
         for (auto m: move)
@@ -237,9 +225,6 @@ auto part2(T& input)
                 case '^': perform_move_vert(grid, -1, row, col); break;
                 case 'v': perform_move_vert(grid,  1, row, col); break;
             }
-
-            // cout << "Move " << m << endl;
-            // print();
         }
     }              
 
@@ -260,15 +245,12 @@ auto part2(T& input)
 void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
-    //for (auto line: lines) cout << line << endl;
 
     auto p1 = part1(lines);
     cout << "Part1: " << p1 << '\n';
-    
 
     auto p2 = part2(lines);
     cout << "Part2: " << p2 << '\n';
-    
 }
 
 
