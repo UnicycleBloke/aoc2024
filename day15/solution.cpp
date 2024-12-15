@@ -5,7 +5,163 @@ template <typename T>
 auto part1(const T& input)
 {
     aoc::timer timer;
-    return 0;
+
+    vector<string> grid;
+    vector<string> moves;
+    for (auto line: input)
+    {
+        if (line[0] == '#') grid.push_back(line);
+        else moves.push_back(line);
+    }
+
+    uint32_t row{}, col{};
+
+    // Find the size and initial position.
+    auto rows = grid.size();
+    auto cols = grid[0].size();
+    for (auto r: aoc::range(rows))
+    {
+        for (auto c: aoc::range(cols))
+        {
+            if (grid[r][c] == '@')
+            {
+                row = r;
+                col = c;
+                break;
+            }
+        }
+    }      
+
+    auto do_move = [&](int dr, int dc)
+    {
+        auto row2 = row;
+        auto col2 = col;
+
+        // Keep looking until we find a space or hit a wall.
+        while (true)
+        {
+            row2 += dr;
+            col2 += dc;
+
+            if (grid[row2][col2] == '#') 
+            {
+                return;
+            } 
+            else if (grid[row2][col2] == '.')
+            {
+                grid[row][col] = '.';
+                grid[row2][col2] = 'O';
+                row += dr;
+                col += dc;
+                grid[row][col] = '@';
+                return;
+            }
+        }
+    };
+
+    for (auto move: moves)
+    {
+        for (auto m: move)
+        {
+            switch (m)
+            {
+                case '>': do_move( 0,  1); break;
+                case '<': do_move( 0, -1); break;
+                case '^': do_move(-1,  0); break;
+                case 'v': do_move( 1,  0); break;
+            }
+        }
+    }
+
+    uint64_t gps{};
+    for (auto r: aoc::range(rows))
+    {
+        for (auto c: aoc::range(cols))
+        {
+            if (grid[r][c] == 'O')
+                gps += 100*r + c;
+        }
+    }              
+
+    return gps;
+}
+
+
+bool can_move_horz(const vector<string>& grid, int dir, int r, int c)
+{
+    switch (grid[r][c + dir])
+    {
+        case '#': return false;
+        case '.': return true;
+        case '[': 
+        case ']': return can_move_horz(grid, dir, r, c + dir);
+    }
+    return false;
+}
+
+
+bool can_move_vert(const vector<string>& grid, int dir, int r, int c)
+{
+    switch (grid[r + dir][c])
+    {
+        case '#': return false;
+        case '.': return true;
+        case '[': return can_move_vert(grid, dir, r + dir, c) && can_move_vert(grid, dir, r + dir, c + 1);
+        case ']': return can_move_vert(grid, dir, r + dir, c) && can_move_vert(grid, dir, r + dir, c - 1);
+    }
+    return false;
+}
+
+
+void do_move_horz(vector<string>& grid, int dir, int r, int c)
+{
+    auto temp = grid[r][c];
+ 
+    if (grid[r][c + dir] != '.')
+        do_move_horz(grid, dir, r, c + dir);
+    grid[r][c + dir] = temp;
+ 
+    grid[r][c] = '.';    
+}
+
+
+void do_move_vert(vector<string>& grid, int dir, int r, int c)
+{
+    auto temp = grid[r][c];
+
+    if (grid[r + dir][c] == '[')
+    {
+        do_move_vert(grid, dir, r + dir, c);
+        do_move_vert(grid, dir, r + dir, c + 1);
+    }
+    else if (grid[r + dir][c] == ']')
+    {
+        do_move_vert(grid, dir, r + dir, c);
+        do_move_vert(grid, dir, r + dir, c - 1);
+    }
+
+    grid[r + dir][c] = temp;
+    grid[r][c] = '.';    
+}    
+
+
+void perform_move_horz(vector<string>& grid, int dir, int& row, int& col)
+{
+    if (can_move_horz(grid, dir, row, col))
+    {
+        do_move_horz(grid, dir, row, col);
+        col += dir; 
+    }
+}
+
+
+void perform_move_vert(vector<string>& grid, int dir, int& row, int& col)
+{
+    if (can_move_vert(grid, dir, row, col))
+    {
+        do_move_vert(grid, dir, row, col);
+        row += dir; 
+    }
 }
 
 
@@ -13,29 +169,98 @@ template <typename T>
 auto part2(T& input)
 {
     aoc::timer timer;
-    return 0;
+
+    // Create the expanded grid.
+    vector<string> grid;
+    vector<string> moves;
+    for (auto line: input)
+    {
+        if (line[0] == '#')
+        {
+            ostringstream os;
+            for (auto c: line)
+            {
+                switch (c)
+                {
+                    case '#': os << "##"; break;
+                    case 'O': os << "[]"; break;
+                    case '.': os << ".."; break;
+                    case '@': os << "@."; break;
+                }
+            }
+            grid.push_back(os.str());
+        }
+        else 
+        {
+            moves.push_back(line);
+        }
+    }
+
+    int row{}, col{};
+
+    // Find the size and initial position.
+    auto rows = grid.size();
+    auto cols = grid[0].size();
+    for (auto r: aoc::range(rows))
+    {
+        for (auto c: aoc::range(cols))
+        {
+            if (grid[r][c] == '@')
+            {
+                row = r;
+                col = c;
+                break;
+            }
+        }
+    }      
+
+    // auto print = [&]()
+    // {
+    //     for (auto r: aoc::range(rows))
+    //     {
+    //         for (auto c: aoc::range(cols))
+    //             cout << grid[r][c];
+    //         cout << endl;
+    //     }
+    //     cout << endl;
+    // };
+
+    // print();
+    for (auto move: moves)
+    {
+        for (auto m: move)
+        {
+            switch (m)
+            {
+                case '>': perform_move_horz(grid,  1, row, col); break;
+                case '<': perform_move_horz(grid, -1, row, col); break;
+                case '^': perform_move_vert(grid, -1, row, col); break;
+                case 'v': perform_move_vert(grid,  1, row, col); break;
+            }
+
+            // cout << "Move " << m << endl;
+            // print();
+        }
+    }              
+
+    uint64_t gps{};
+    for (auto r: aoc::range(rows))
+    {
+        for (auto c: aoc::range(cols))
+        {
+            if (grid[r][c] == '[')
+                gps += 100*r + c;
+        }
+    }              
+
+    return gps;
 }
 
 
-// vector<tuple<Args...>>
-//auto lines = aoc::read_lines<int,int,int,int>(filename, R"((\d+)-(\d+),(\d+)-(\d+))");
-
-// vector<string>    
-//auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
-
-// Replace all substrings matching "search" with "replace".
-//std::string replace(std::string source, const std::string& search, const std::string& replace);
-
-// Split a delimited string of tokens into a vector of string tokens. Trims substrings by default and drops trimmed 
-// tokens which are empty by default. Not convinced how useful the option are, but you never know.
-//std::vector<std::string> split(std::string source, std::string delim, Blanks allow_blanks = Blanks::Suppress, Trim trim_subs = Trim::Yes);
-
-// vector (size_type n, const value_type& val = value_type(),
-//vector<int> row(COLS, 0);
-//vector<vector<int>> grid(ROWS, row);
 void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
+    //for (auto line: lines) cout << line << endl;
 
     auto p1 = part1(lines);
     cout << "Part1: " << p1 << '\n';
