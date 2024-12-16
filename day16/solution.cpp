@@ -49,21 +49,24 @@ auto part1(const T& input)
     const auto kRows = input.size();
     const auto kCols = input[0].size();
 
-    // for (auto r: aoc::range(kRows))
-    // {
-    //     for (auto c: aoc::range(kCols))
-    //     {
-    //         if (input[r][c] == 'S')
-    //         {
-    //         } 
-    //     }
-    // }
     int  row = kRows - 2;
     int  col = 1;
+    for (auto r: aoc::range(kRows))
+    {
+        for (auto c: aoc::range(kCols))
+        {
+            if (input[r][c] == 'S')
+            {
+                row = r;
+                col = c;
+                break;
+            } 
+        }
+    }
     char dir = 'E';
 
-    map<pair<int, int>, int> scores;
-    scores[{row, col}] = 0;
+    map<tuple<int, int, char>, int> scores;
+    scores[make_tuple(row, col, dir)] = 0;
 
     set<tuple<int, int, char>> visited;
 
@@ -72,25 +75,11 @@ auto part1(const T& input)
 
     while (front.size() > 0)
     {
-        // cout << "while" << endl;
-        // for (auto [r, c, d]: front)
-        //     cout << r << " " << c << " " << d << endl;
-
         set<tuple<int, int, char>> front2;
         for (const auto& f: front)
         {
             visited.insert(f);
-
             const auto [r, c, d] = f;
-            if (input[r][c] == 'E') 
-            {
-                cout << r << " " << c << " " << d << " EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE" << endl;
-                int x = r;
-                int y = c;
-                auto p = make_pair(x, y);
-                int score = scores[p];
-                cout << score << endl;
-            }
             
             {
                 auto ds = dirs(d);
@@ -101,12 +90,10 @@ auto part1(const T& input)
                     if (visited.find(t) == visited.end())
                         front2.insert(t);
 
-                    auto fpos = make_pair(r, c);    
-                    auto tpos = make_pair(r + dr, c + dc);    
-                    if (scores[tpos] == 0)                        
-                        scores[tpos] = scores[fpos] + 1;
+                    if (scores[t] == 0)                        
+                        scores[t] = scores[f] + 1;
                     else
-                        scores[tpos] = min(scores[tpos], scores[fpos] + 1);                        
+                        scores[t] = min(scores[t], scores[f] + 1);                        
                 }
             }
 
@@ -119,12 +106,10 @@ auto part1(const T& input)
                     if (visited.find(t) == visited.end())
                         front2.insert(t);
 
-                    auto fpos = make_pair(r, c);    
-                    auto tpos = make_pair(r + dr, c + dc);    
-                    if (scores[tpos] == 0)                        
-                        scores[tpos] = scores[fpos] + 1001;
+                    if (scores[t] == 0)                        
+                        scores[t] = scores[f] + 1001;
                     else
-                        scores[tpos] = min(scores[tpos], scores[fpos] + 1001);                        
+                        scores[t] = min(scores[t], scores[f] + 1001);                        
                 }
 
             }
@@ -138,12 +123,10 @@ auto part1(const T& input)
                     if (visited.find(t) == visited.end())
                         front2.insert(t);
 
-                    auto fpos = make_pair(r, c);    
-                    auto tpos = make_pair(r + dr, c + dc);    
-                    if (scores[tpos] == 0)                        
-                        scores[tpos] = scores[fpos] + 1001;
+                    if (scores[t] == 0)                        
+                        scores[t] = scores[f] + 1001;
                     else
-                        scores[tpos] = min(scores[tpos], scores[fpos] + 1001);                        
+                        scores[t] = min(scores[t], scores[f] + 1001);                        
                 }
             }
         }
@@ -151,15 +134,16 @@ auto part1(const T& input)
         front = front2;
     }
 
+    int result = 0x7FFF'FFFF;
     for (auto [pos, score]: scores)
     {
-        auto [row, col] = pos;
-        cout << row << " " << col << " " << score << endl;
+        auto [row, col, dir] = pos;
+        cout << row << " " << col << " " << dir << " " << score << endl;
+        if (input[row][col] == 'E')
+            result = min(result, score);
     }
 
-    cout << scores[make_pair(1, kCols - 2)] << endl;
-
-    return 0;
+    return result;
 }
 
 
@@ -171,22 +155,6 @@ auto part2(T& input)
 }
 
 
-// vector<tuple<Args...>>
-//auto lines = aoc::read_lines<int,int,int,int>(filename, R"((\d+)-(\d+),(\d+)-(\d+))");
-
-// vector<string>    
-//auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
-
-// Replace all substrings matching "search" with "replace".
-//std::string replace(std::string source, const std::string& search, const std::string& replace);
-
-// Split a delimited string of tokens into a vector of string tokens. Trims substrings by default and drops trimmed 
-// tokens which are empty by default. Not convinced how useful the option are, but you never know.
-//std::vector<std::string> split(std::string source, std::string delim, Blanks allow_blanks = Blanks::Suppress, Trim trim_subs = Trim::Yes);
-
-// vector (size_type n, const value_type& val = value_type(),
-//vector<int> row(COLS, 0);
-//vector<vector<int>> grid(ROWS, row);
 void run(const char* filename)
 {
     auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
