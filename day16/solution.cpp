@@ -75,11 +75,14 @@ auto part1(const T& input)
 
     while (front.size() > 0)
     {
+        cout << endl;
+
         set<tuple<int, int, char>> front2;
         for (const auto& f: front)
         {
             visited.insert(f);
             const auto [r, c, d] = f;
+            cout << r << " " << c << " " << d << " " << scores[f] << endl;
             
             {
                 auto ds = dirs(d);
@@ -90,61 +93,52 @@ auto part1(const T& input)
                     if (visited.find(t) == visited.end())
                         front2.insert(t);
 
+                    auto s = scores[t];
                     if (scores[t] == 0)                        
                         scores[t] = scores[f] + 1;
                     else
                         scores[t] = min(scores[t], scores[f] + 1);                        
+    
+                    if (scores[t] < s)
+                    front2.insert(t);
+
+                    cout << "    " << (r+dr) << " " << (c+dc) << " " << d << " " << s << " -> " << scores[t] << endl;
                 }
+
             }
 
             {
-                // auto ds = dirs(turn_left(d));
-                // auto [dr, dc] = ds;
-                // if (input[r + dr][c + dc] != '#')
-                // {
-                //     auto t = make_tuple(r + dr, c + dc, turn_left(d));
-                //     if (visited.find(t) == visited.end())
-                //         front2.insert(t);
-
-                //     if (scores[t] == 0)                        
-                //         scores[t] = scores[f] + 1001;
-                //     else
-                //         scores[t] = min(scores[t], scores[f] + 1001);                        
-                // }
-
                 auto t = make_tuple(r, c, turn_left(d));
                 if (visited.find(t) == visited.end())
                     front2.insert(t);
 
+                auto s = scores[t];
                 if (scores[t] == 0)                        
                     scores[t] = scores[f] + 1000;
                 else
                     scores[t] = min(scores[t], scores[f] + 1000);                        
+
+                if (scores[t] < s)
+                    front2.insert(t);
+
+                cout << "    " << r << " " << c << " " << turn_left(d) << " "  << s << " -> " << scores[t] << endl;
             }
 
             {
-                // auto ds = dirs(turn_right(d));
-                // auto [dr, dc] = ds;
-                // if (input[r + dr][c + dc] != '#')
-                // {
-                //     auto t = make_tuple(r + dr, c + dc, turn_right(d));
-                //     if (visited.find(t) == visited.end())
-                //         front2.insert(t);
-
-                //     if (scores[t] == 0)                        
-                //         scores[t] = scores[f] + 1001;
-                //     else
-                //         scores[t] = min(scores[t], scores[f] + 1001);                        
-                // }
-
                 auto t = make_tuple(r, c, turn_right(d));
                 if (visited.find(t) == visited.end())
                     front2.insert(t);
 
+                auto s = scores[t];
                 if (scores[t] == 0)                        
                     scores[t] = scores[f] + 1000;
                 else
                     scores[t] = min(scores[t], scores[f] + 1000);                        
+
+                if (scores[t] < s)
+                    front2.insert(t);
+
+                cout << "    " << r << " " << c << " " << turn_right(d) << " "  << s << " -> " << scores[t] << endl;
             }
         }
 
@@ -155,7 +149,7 @@ auto part1(const T& input)
     for (auto [pos, score]: scores)
     {
         auto [row, col, dir] = pos;
-        cout << row << " " << col << " " << dir << " " << score << endl;
+        //cout << row << " " << col << " " << dir << " " << score << endl;
         if (input[row][col] == 'E')
             result = min(result, score);
     }
