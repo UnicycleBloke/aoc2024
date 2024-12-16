@@ -75,14 +75,14 @@ auto part1(const T& input)
 
     while (front.size() > 0)
     {
-        cout << endl;
+        //cout << endl;
 
         set<tuple<int, int, char>> front2;
         for (const auto& f: front)
         {
             visited.insert(f);
             const auto [r, c, d] = f;
-            cout << r << " " << c << " " << d << " " << scores[f] << endl;
+            //cout << r << " " << c << " " << d << " " << scores[f] << endl;
             
             {
                 auto ds = dirs(d);
@@ -102,7 +102,7 @@ auto part1(const T& input)
                     if (scores[t] < s)
                     front2.insert(t);
 
-                    cout << "    " << (r+dr) << " " << (c+dc) << " " << d << " " << s << " -> " << scores[t] << endl;
+                    //cout << "    " << (r+dr) << " " << (c+dc) << " " << d << " " << s << " -> " << scores[t] << endl;
                 }
 
             }
@@ -121,7 +121,7 @@ auto part1(const T& input)
                 if (scores[t] < s)
                     front2.insert(t);
 
-                cout << "    " << r << " " << c << " " << turn_left(d) << " "  << s << " -> " << scores[t] << endl;
+                //cout << "    " << r << " " << c << " " << turn_left(d) << " "  << s << " -> " << scores[t] << endl;
             }
 
             {
@@ -138,7 +138,7 @@ auto part1(const T& input)
                 if (scores[t] < s)
                     front2.insert(t);
 
-                cout << "    " << r << " " << c << " " << turn_right(d) << " "  << s << " -> " << scores[t] << endl;
+                //cout << "    " << r << " " << c << " " << turn_right(d) << " "  << s << " -> " << scores[t] << endl;
             }
         }
 
@@ -149,10 +149,101 @@ auto part1(const T& input)
     for (auto [pos, score]: scores)
     {
         auto [row, col, dir] = pos;
-        //cout << row << " " << col << " " << dir << " " << score << endl;
         if (input[row][col] == 'E')
             result = min(result, score);
     }
+
+    set<tuple<int, int, char, int>> seats;
+    for (auto [pos, score]: scores)
+    {
+        auto [row, col, dir] = pos;
+        if ((input[row][col] == 'E') && (score == result))
+            seats.insert({row, col, dir, score});
+    }
+
+    set<tuple<int, int>> all_seats;
+    while (seats.size() > 0)
+    {
+        set<tuple<int, int, char, int>> seats2;
+        for (auto [row, col, dir, scored]: seats)
+        {
+            all_seats.insert({row, col});
+
+            if (dir == 'N')
+            {
+                if ((scores[{row + 1, col, 'N'}] + 1 == scored)) 
+                    seats2.insert({row + 1, col, 'N', scored - 1});
+                if ((scores[{row - 1, col, 'S'}] + 1001 == scored)) 
+                    seats2.insert({row - 1, col, 'S', scored - 1001});
+                if ((scores[{row, col - 1, 'E'}] + 1001 == scored)) 
+                    seats2.insert({row, col - 1, 'E', scored - 1001});
+                if ((scores[{row, col + 1, 'W'}] + 1001 == scored)) 
+                    seats2.insert({row, col + 1, 'W', scored - 1001});
+            }
+
+            if (dir == 'S')
+            {
+                if ((scores[{row + 1, col, 'N'}] + 1001 == scored)) 
+                    seats2.insert({row + 1, col, 'N', scored - 1001});
+                if ((scores[{row - 1, col, 'S'}] + 1 == scored)) 
+                    seats2.insert({row - 1, col, 'S', scored - 1});
+                if ((scores[{row, col - 1, 'E'}] + 1001 == scored)) 
+                    seats2.insert({row, col - 1, 'E', scored - 1001});
+                if ((scores[{row, col + 1, 'W'}] + 1001 == scored)) 
+                    seats2.insert({row, col + 1, 'W', scored - 1001});
+            }
+
+            if (dir == 'E')
+            {
+                if ((scores[{row + 1, col, 'N'}] + 1001 == scored)) 
+                    seats2.insert({row + 1, col, 'N', scored - 1001});
+                if ((scores[{row - 1, col, 'S'}] + 1001 == scored)) 
+                    seats2.insert({row - 1, col, 'S', scored - 1001});
+                if ((scores[{row, col - 1, 'E'}] + 1 == scored)) 
+                    seats2.insert({row, col - 1, 'E', scored - 1});
+                if ((scores[{row, col + 1, 'W'}] + 1001 == scored)) 
+                    seats2.insert({row, col + 1, 'W', scored - 1001});
+            }
+
+            if (dir == 'W')
+            {
+                if ((scores[{row + 1, col, 'N'}] + 1001 == scored)) 
+                    seats2.insert({row + 1, col, 'N', scored - 1001});
+                if ((scores[{row - 1, col, 'S'}] + 1001 == scored)) 
+                    seats2.insert({row - 1, col, 'S', scored - 1001});
+                if ((scores[{row, col - 1, 'E'}] + 1001 == scored)) 
+                    seats2.insert({row, col - 1, 'E', scored - 1001});
+                if ((scores[{row, col + 1, 'W'}] + 1 == scored)) 
+                    seats2.insert({row, col + 1, 'W', scored - 1});
+            }
+        }
+        seats = seats2;
+    }
+
+    cout << all_seats.size() << endl;
+
+    // for (auto r: aoc::range(kRows))
+    // { 
+    //     auto print_row = [&](char dir)
+    //     {
+    //         for (auto c: aoc::range(kCols)) 
+    //         {
+    //             auto score = scores[{r, c, dir}];
+    //             if (score > 0)
+    //                 printf("%6d:%c   ", score, dir); 
+    //             else
+    //                 printf("XXXXXXXX   "); 
+    //         }
+    //         cout << endl;
+    //     };       
+
+    //     print_row('N');
+    //     print_row('E');
+    //     print_row('S');
+    //     print_row('W');
+    //     cout << endl;
+    // }
+    // cout << endl;
 
     return result;
 }
