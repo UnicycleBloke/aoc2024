@@ -98,36 +98,53 @@ auto part1(const T& input)
             }
 
             {
-                auto ds = dirs(turn_left(d));
-                auto [dr, dc] = ds;
-                if (input[r + dr][c + dc] != '#')
-                {
-                    auto t = make_tuple(r + dr, c + dc, turn_left(d));
-                    if (visited.find(t) == visited.end())
-                        front2.insert(t);
+                // auto ds = dirs(turn_left(d));
+                // auto [dr, dc] = ds;
+                // if (input[r + dr][c + dc] != '#')
+                // {
+                //     auto t = make_tuple(r + dr, c + dc, turn_left(d));
+                //     if (visited.find(t) == visited.end())
+                //         front2.insert(t);
 
-                    if (scores[t] == 0)                        
-                        scores[t] = scores[f] + 1001;
-                    else
-                        scores[t] = min(scores[t], scores[f] + 1001);                        
-                }
+                //     if (scores[t] == 0)                        
+                //         scores[t] = scores[f] + 1001;
+                //     else
+                //         scores[t] = min(scores[t], scores[f] + 1001);                        
+                // }
 
+                auto t = make_tuple(r, c, turn_left(d));
+                if (visited.find(t) == visited.end())
+                    front2.insert(t);
+
+                if (scores[t] == 0)                        
+                    scores[t] = scores[f] + 1000;
+                else
+                    scores[t] = min(scores[t], scores[f] + 1000);                        
             }
 
             {
-                auto ds = dirs(turn_right(d));
-                auto [dr, dc] = ds;
-                if (input[r + dr][c + dc] != '#')
-                {
-                    auto t = make_tuple(r + dr, c + dc, turn_right(d));
-                    if (visited.find(t) == visited.end())
-                        front2.insert(t);
+                // auto ds = dirs(turn_right(d));
+                // auto [dr, dc] = ds;
+                // if (input[r + dr][c + dc] != '#')
+                // {
+                //     auto t = make_tuple(r + dr, c + dc, turn_right(d));
+                //     if (visited.find(t) == visited.end())
+                //         front2.insert(t);
 
-                    if (scores[t] == 0)                        
-                        scores[t] = scores[f] + 1001;
-                    else
-                        scores[t] = min(scores[t], scores[f] + 1001);                        
-                }
+                //     if (scores[t] == 0)                        
+                //         scores[t] = scores[f] + 1001;
+                //     else
+                //         scores[t] = min(scores[t], scores[f] + 1001);                        
+                // }
+
+                auto t = make_tuple(r, c, turn_right(d));
+                if (visited.find(t) == visited.end())
+                    front2.insert(t);
+
+                if (scores[t] == 0)                        
+                    scores[t] = scores[f] + 1000;
+                else
+                    scores[t] = min(scores[t], scores[f] + 1000);                        
             }
         }
 
