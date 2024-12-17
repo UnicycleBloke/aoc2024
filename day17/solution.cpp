@@ -133,33 +133,43 @@ auto part2(T input)
 
     int digits = 1;
     std::vector<int64_t> as;
-    for (auto a: aoc::range(1 << 12))
+    for (auto a: aoc::range(1 << 9))
         as.push_back(a);
 
     std::vector<int64_t> as2;
 
-    for (auto a: as)
+    while (digits < 4)
     {
-        State state;
-        state.a    = a;
-        state.b    = 0;
-        state.c    = 0;
-        state.prog = prog;
-
-        state.run();
-
-        bool matches = true;
-        for (auto d: aoc::range(digits))
-            matches &= (prog[d] == state.dump[d]);
-
-        if (matches)
+        for (auto a: as)
         {
-            cout << a << endl;
-            auto octal = to_octal(a);
-            print(octal);
-            as2.push_back(a);
-        }
-    } 
+            State state;
+            state.a    = a;
+            state.b    = 0;
+            state.c    = 0;
+            state.prog = prog;
+
+            state.run();
+
+            bool matches = true;
+            for (auto d: aoc::range(digits))
+                matches &= (prog[d] == state.dump[d]);
+
+            if (matches)
+            {
+                cout << a << endl;
+                auto octal = to_octal(a);
+                print(octal);
+
+                for (auto x: aoc::range(8))
+                {
+                    int64_t b = x * (1 << (digits + 9))
+                    as2.push_back(a);
+                }
+
+
+            }
+        } 
+    }
     return 0;
 }
 
