@@ -131,8 +131,14 @@ auto part2(T input)
     //std::vector<int> prog = { 0, 3, 5, 4, 3, 0 };
     std::vector<int> prog = { 2, 4, 1, 5, 7, 5, 1, 6, 0, 3, 4, 1, 5, 5, 3, 0 };
 
-    std::vector<int> v =  { 2, 4, 1, };
+    int digits = 3;
+    std::vector<int64_t> as;
     for (auto a: aoc::range(1 << 12))
+        as.push_back(a);
+
+    std::vector<int64_t> as2;
+
+    for (auto a: as)
     {
         State state;
         state.a    = a;
@@ -142,11 +148,16 @@ auto part2(T input)
 
         state.run();
 
-        if ((v[0] == state.dump[0]) && (v[1] == state.dump[1]) && (v[2] == state.dump[2]))
+        bool matches = true;
+        for (auto d: aoc::range(digits))
+            matches &= (prog[d] == state.dump[d]);
+
+        if (matches)
         {
             cout << a << endl;
             auto octal = to_octal(a);
             print(octal);
+            as2.push_back(a);
         }
     } 
     return 0;
