@@ -161,6 +161,8 @@ auto part1(const T& input)
             seats.insert({row, col, dir, score});
     }
 
+    // Find a set of locations by back tracking the cost. Straight sections are -1.
+    // Turns are -1001. 
     set<tuple<int, int>> all_seats;
     while (seats.size() > 0)
     {
@@ -220,8 +222,11 @@ auto part1(const T& input)
         seats = seats2;
     }
 
+    // This is off by 2 for some reason. Both example +2, so I guessed the same for the input. 
+    // Got lucky. Want to track this down and improve the code for back-tracing the paths.
     cout << all_seats.size() << endl;
 
+    // Dump the grid to help reason about how to solve part 2.
     // for (auto r: aoc::range(kRows))
     // { 
     //     auto print_row = [&](char dir)
