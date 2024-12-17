@@ -131,26 +131,25 @@ auto part2(T input)
     //std::vector<int> prog = { 0, 3, 5, 4, 3, 0 };
     std::vector<int> prog = { 2, 4, 1, 5, 7, 5, 1, 6, 0, 3, 4, 1, 5, 5, 3, 0 };
 
-    std::vector<int> v = prog;
-    std::ranges::sort(v);
-    do 
+    std::vector<int> v =  { 2, 4, 1, };
+    for (auto a: aoc::range(1 << 12))
     {
-        cout << from_octal(v) << endl;
-
         State state;
-        state.a    = from_octal(v);
+        state.a    = a;
         state.b    = 0;
         state.c    = 0;
         state.prog = prog;
 
-        print(state.prog);
         state.run();
-        print(state.dump);
 
-        if (state.prog == state.dump) break;
+        if ((v[0] == state.dump[0]) && (v[1] == state.dump[1]) && (v[2] == state.dump[2]))
+        {
+            cout << a << endl;
+            auto octal = to_octal(a);
+            print(octal);
+        }
     } 
-    while (std::next_permutation(v.begin(), v.end()));
-    return from_octal(v);
+    return 0;
 }
 
 
@@ -161,24 +160,14 @@ void run(const char* filename)
     state.b = 0;
     state.c = 0;
     state.prog = vector<int>{ 2, 4, 1, 5, 7, 5, 1, 6, 0, 3, 4, 1, 5, 5, 3, 0 };
-    // 2, 4,   b = a & 7
-    // 1, 5,   b = b ^ 5
-    // 7, 5,   c = a >> b
-    // 1, 6,   b = b ^ 6
-    // 0, 3,   a = a >> 3
-    // 4, 1,   b = b ^ c;
-    // 5, 5,   out (b & 7)
-    // 3, 0    jnz 0
-    // while (a)
-    // {
-    //     b = a & 7
-    //     b = b ^ 5
-    //     c = a >> b
-    //     b = b ^ 6
-    //     a = a >> 3
-    //     b = b ^ c;
-    //     out (b & 7)
-    // }
+    // 2, 4, com=a   bst   b = a % 8         // b = low 3 bits of a
+    // 1, 5, lit     bxl   b = b ^ 5         // b XOR 5 - permute
+    // 7, 5, com=b   cdv   c = a >> b        // c = higher bits of a
+    // 1, 6, lit     bxl   b = b ^ 6         // b XOR 6 - permute
+    // 0, 3, com=3   adv   a = a >> 3        // a >>= 3
+    // 4, 1, n/a     bxc   b = b ^ c         // b XOR c - permute
+    // 5, 5, com=b   out   b % 8
+    // 3, 0          jnz   pc = 0        
 
     auto p1 = part1(state);
     std::cout << "Part1: " << p1 << '\n';   
