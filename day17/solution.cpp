@@ -119,19 +119,18 @@ auto part2(vector<uint64_t>& prog)
 
 void run(const char* filename)
 {
+    auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
+    auto [a]   = aoc::parse_line<uint64_t>(R"(Register A: (\d+))", lines[0]);
+    auto [b]   = aoc::parse_line<uint64_t>(R"(Register B: (\d+))", lines[1]);
+    auto [c]   = aoc::parse_line<uint64_t>(R"(Register C: (\d+))", lines[2]);
+    auto s     = aoc::split(lines[3], ":");
+    auto p     = aoc::make_vector<uint64_t>(s[1], ",");
+
     State state;
-    state.a = 44374556;
-    state.b = 0;
-    state.c = 0;
-    state.prog = vector<uint64_t>{ 2, 4, 1, 5, 7, 5, 1, 6, 0, 3, 4, 1, 5, 5, 3, 0 };
-    // 2, 4, com=a   bst   b = a % 8         // b = low 3 bits of a
-    // 1, 5, lit     bxl   b = b ^ 5         // b XOR 5 - permute
-    // 7, 5, com=b   cdv   c = a >> b        // c = higher bits of a
-    // 1, 6, lit     bxl   b = b ^ 6         // b XOR 6 - permute
-    // 0, 3, com=3   adv   a = a >> 3        // a >>= 3
-    // 4, 1, n/a     bxc   b = b ^ c         // b XOR c - permute
-    // 5, 5, com=b   out   b % 8
-    // 3, 0          jnz   pc = 0        
+    state.a    = a;
+    state.b    = b;
+    state.c    = c;
+    state.prog = p;
 
     auto p1 = part1(state);
     cout << "Part1: " << p1 << '\n';   
