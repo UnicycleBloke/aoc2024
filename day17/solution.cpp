@@ -3,22 +3,18 @@
 
 struct State
 {
-    int64_t a{};
-    int64_t b{};
-    int64_t c{};
-    vector<int> prog;
+    uint64_t a{};
+    uint64_t b{};
+    uint64_t c{};
+    vector<uint64_t> prog;
 
-    int64_t pc{};
-    vector<int> dump;
-    int64_t loops{};
+    uint64_t pc{};
+    vector<uint64_t> dump;
 
     void run()
     {
-        while ((pc < prog.size()) && (prog.size() > dump.size()) && (loops < 100))
-        {
-            ++loops;
+        while (pc < prog.size())
             process();
-        }     
     }
 
     void process()
@@ -36,39 +32,22 @@ struct State
 
         switch (opcode)
         {
-            case 0: // adv - division
-                a = a / (1 << combo);
-                //cout << "a = a / (1 << combo) = a / " << (1 << combo) << " = " << a << endl;
-                break;
-            case 1: // bxl 
-                b = b ^ literal;
-                //cout << "b = b ^ " << literal << " = " << b << endl;
-                break;
-            case 2: // bst
-                b = combo % 8;
-                //cout << "b = " << b << endl;
-                break;
-            case 3: // jnz
-                if (a != 0)
-                    pc = literal;
-                //cout << " a=" << a << "  b=" << b << "  c=" << c << endl;
-                break;
-            case 4: // bxc
-                b = b ^ c;
-                //cout << "b = b ^ c = " << b << endl;
-                break;
-            case 5: // out
-                dump.push_back(combo % 8);
-                //cout << "dump " << (combo % 8) << endl;
-                break;
-            case 6: // bdv
-                b = a / (1 << combo);
-                //cout << "b = a / (1 << combo) = a / " << (1 << combo) << " = " << b << endl;
-                break;
-            case 7: // cdv
-                c = a / (1 << combo);
-                //cout << "c = a / (1 << combo) = a / " << (1 << combo) << " = " << c << endl;
-                break;
+            // adv - division
+            case 0: a = a / (1UL << combo); break;
+            // bxl 
+            case 1: b = b ^ literal; break;
+            // bst
+            case 2: b = combo % 8UL; break;
+            // jnz
+            case 3: if (a != 0UL) pc = literal; break;
+            // bxc
+            case 4: b = b ^ c; break;
+            // out
+            case 5: dump.push_back(combo % 8); break;
+            // bdv
+            case 6: b = a / (1UL << combo); break;
+            // cdv
+            case 7: c = a / (1UL << combo); break;
         } 
     }
 };
@@ -88,58 +67,20 @@ auto part1(T input)
 }
 
 
-
-vector<int> to_octal(int64_t value)
-{
-    std::vector<int> result;
-    do 
-    {
-       result.push_back(value % 8);
-       value = value >> 3;
-    }
-    while (value);
-    r::reverse(result);
-    return result;
-}
-
-
-int64_t from_octal(const vector<int>& value)
-{
-    int64_t result{};
-    for (auto v: value)
-        result = (result << 3) + v;
-    return result << 3;
-}
-
-
-void print(const std::vector<int>& v)
-{
-    for (int e: v) 
-    {
-        std::cout << " " << e;
-    }
-    std::cout << std::endl;
-}
-
-
-template <typename T>
-auto part2(T input)
+auto part2(vector<uint64_t>& prog)
 {
     aoc::timer timer;
 
-    // vector should be sorted at the beginning.
-    //std::vector<int> prog = { 0, 3, 5, 4, 3, 0 };
-    std::vector<int> prog = { 2, 4, 1, 5, 7, 5, 1, 6, 0, 3, 4, 1, 5, 5, 3, 0 };
+    uint64_t digits = 1;
+    uint64_t shift  = 1 << ((digits + 3U) * 3U);
+    set<uint64_t> as;
+    for (auto a: aoc::range(shift))
+        as.insert(a);
 
-    int digits = 1;
-    std::vector<int64_t> as;
-    for (auto a: aoc::range(1 << 9))
-        as.push_back(a);
-
-    std::vector<int64_t> as2;
-
-    while (digits < 4)
+    while (digits <= prog.size())
     {
+        set<uint64_t> as2;
+
         for (auto a: as)
         {
             State state;
@@ -147,30 +88,32 @@ auto part2(T input)
             state.b    = 0;
             state.c    = 0;
             state.prog = prog;
-
             state.run();
 
-            bool matches = true;
+            int matches = 0;
             for (auto d: aoc::range(digits))
-                matches &= (prog[d] == state.dump[d]);
+                matches += (prog[d] == state.dump[d]);
 
-            if (matches)
+            if (matches >= digits)
             {
-                cout << a << endl;
-                auto octal = to_octal(a);
-                print(octal);
-
-                for (auto x: aoc::range(8))
+                for (uint64_t x: aoc::range(8UL))
                 {
-                    int64_t b = x * (1 << (digits + 9))
-                    as2.push_back(a);
+                    uint64_t b = x * shift;
+                    as2.insert(a | b);
                 }
-
-
             }
-        } 
+
+            if (matches == prog.size())
+                return a;
+        }
+
+        digits +=  1;
+        shift  <<= 3;
+
+        as = as2; 
     }
-    return 0;
+
+    return 0UL;
 }
 
 
@@ -180,7 +123,7 @@ void run(const char* filename)
     state.a = 44374556;
     state.b = 0;
     state.c = 0;
-    state.prog = vector<int>{ 2, 4, 1, 5, 7, 5, 1, 6, 0, 3, 4, 1, 5, 5, 3, 0 };
+    state.prog = vector<uint64_t>{ 2, 4, 1, 5, 7, 5, 1, 6, 0, 3, 4, 1, 5, 5, 3, 0 };
     // 2, 4, com=a   bst   b = a % 8         // b = low 3 bits of a
     // 1, 5, lit     bxl   b = b ^ 5         // b XOR 5 - permute
     // 7, 5, com=b   cdv   c = a >> b        // c = higher bits of a
@@ -191,10 +134,10 @@ void run(const char* filename)
     // 3, 0          jnz   pc = 0        
 
     auto p1 = part1(state);
-    std::cout << "Part1: " << p1 << '\n';   
+    cout << "Part1: " << p1 << '\n';   
 
-    auto p2 = part2(state);
-    std::cout << "Part2: " << p2 << '\n';
+    auto p2 = part2(state.prog);
+    cout << "Part2: " << p2 << '\n';
 }
 
 
@@ -218,7 +161,7 @@ int main(int argc, char** argv)
 
         run(argv[1]);
     }
-    catch (std::exception& e)
+    catch (exception& e)
     {
         cout << e.what();
     }
