@@ -131,7 +131,7 @@ auto part2(T input)
     //std::vector<int> prog = { 0, 3, 5, 4, 3, 0 };
     std::vector<int> prog = { 2, 4, 1, 5, 7, 5, 1, 6, 0, 3, 4, 1, 5, 5, 3, 0 };
 
-    int digits = 3;
+    int digits = 1;
     std::vector<int64_t> as;
     for (auto a: aoc::range(1 << 12))
         as.push_back(a);
