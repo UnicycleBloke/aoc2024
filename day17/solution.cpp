@@ -10,11 +10,15 @@ struct State
 
     int64_t pc{};
     vector<int> dump;
+    int64_t loops{};
 
     void run()
     {
-        while (pc < prog.size())
+        while ((pc < prog.size()) && (prog.size() > dump.size()) && (loops < 100))
+        {
+            ++loops;
             process();
+        }     
     }
 
     void process()
@@ -84,35 +88,69 @@ auto part1(T input)
 }
 
 
+
+vector<int> to_octal(int64_t value)
+{
+    std::vector<int> result;
+    do 
+    {
+       result.push_back(value % 8);
+       value = value >> 3;
+    }
+    while (value);
+    r::reverse(result);
+    return result;
+}
+
+
+int64_t from_octal(const vector<int>& value)
+{
+    int64_t result{};
+    for (auto v: value)
+        result = (result << 3) + v;
+    return result << 3;
+}
+
+
+void print(const std::vector<int>& v)
+{
+    for (int e: v) 
+    {
+        std::cout << " " << e;
+    }
+    std::cout << std::endl;
+}
+
+
 template <typename T>
 auto part2(T input)
 {
     aoc::timer timer;
 
-    int a;
-    while (true)
+    // vector should be sorted at the beginning.
+    //std::vector<int> prog = { 0, 3, 5, 4, 3, 0 };
+    std::vector<int> prog = { 2, 4, 1, 5, 7, 5, 1, 6, 0, 3, 4, 1, 5, 5, 3, 0 };
+
+    std::vector<int> v = prog;
+    std::ranges::sort(v);
+    do 
     {
+        cout << from_octal(v) << endl;
+
         State state;
-        state.a = a;
-        state.b = 0;
-        state.c = 0;
-        state.prog = vector<int>{ 0, 3, 5, 4, 3, 0 };
-        //0, 3,  a = a / (1 << 3)    a = a >> 3
-        //5, 4,  out << (a & 7)
-        //3, 0   jnz 0
-        // while (a)
-        // {
-        //     a = a >> 3;
-        //     dump << (a & 7);
-        // } 
+        state.a    = from_octal(v);
+        state.b    = 0;
+        state.c    = 0;
+        state.prog = prog;
 
+        print(state.prog);
         state.run();
-        if (state.prog == state.dump) break;
-        //cout << a << endl;
-        ++a;
-    }
+        print(state.dump);
 
-    return a;
+        if (state.prog == state.dump) break;
+    } 
+    while (std::next_permutation(v.begin(), v.end()));
+    return from_octal(v);
 }
 
 
