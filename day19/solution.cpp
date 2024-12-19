@@ -36,11 +36,15 @@ uint64_t is_possible2(const string pattern, size_t offset, const vector<string>&
 
     auto size = pattern.size() - offset;
 
+    set<size_t> lengths;
+
     uint64_t result{};
     for (const auto& t: towels)
     {       
         size_t len = t.size();
         if (size < len) continue;
+        // Already matched with this length
+        if (lengths.find(len) != lengths.end()) continue;
 
         bool matched = true;
         for (auto i: aoc::range(len))
@@ -50,6 +54,7 @@ uint64_t is_possible2(const string pattern, size_t offset, const vector<string>&
 
         if (matched)
         {
+            lengths.insert(len);
             result += is_possible2(pattern, offset + len, towels, counts);
         }
     }
@@ -89,8 +94,13 @@ auto part2(T& input)
     uint64_t count{};
     for (auto p: aoc::range(1U, input.size()))
     {
-        map<size_t, size_t> counts;
-        count += is_possible2(input[p], 0, towels, counts);
+        set<size_t> lengths;
+        if (is_possible(input[p], 0, towels, lengths))
+        {
+            map<size_t, size_t> counts;
+            count += is_possible2(input[p], 0, towels, counts);
+            cout << count << endl;
+        }
     } 
 
     return count;
