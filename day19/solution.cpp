@@ -29,6 +29,35 @@ bool is_possible(const string pattern, size_t offset, const vector<string>& towe
 }
 
 
+uint64_t is_possible2(const string pattern, size_t offset, const vector<string>& towels, map<size_t, size_t>& counts)
+{
+    if (offset == pattern.size()) return 1;
+    if (counts.find(offset) != counts.end()) return counts[offset];
+
+    auto size = pattern.size() - offset;
+
+    uint64_t result{};
+    for (const auto& t: towels)
+    {       
+        size_t len = t.size();
+        if (size < len) continue;
+
+        bool matched = true;
+        for (auto i: aoc::range(len))
+        {
+            matched = matched && (pattern[offset + i] == t[i]); 
+        }
+
+        if (matched)
+        {
+            result += is_possible2(pattern, offset + len, towels, counts);
+        }
+    }
+
+    return result;
+}
+
+
 template <typename T>
 auto part1(const T& input)
 {
@@ -36,16 +65,11 @@ auto part1(const T& input)
 
     auto towels = aoc::split(input[0], ",");
     sort(towels.begin(), towels.end(), [](auto a, auto b){ return a.size() > b.size(); });
-    //cout << "towels " << towels.size() << endl;
-    //for (auto t: towels) cout << t << " "; cout << endl;
-
-    set<size_t> sizes;
-    for (auto t: towels) sizes.insert(t.size());
-    //for (auto s: sizes) cout << s << " "; cout << endl;
 
     uint32_t count{};
     for (auto p: aoc::range(1U, input.size()))
     {
+        // Memo for the lengths we already matched, to avoid pointless repetition.
         set<size_t> lengths;
         count += is_possible(input[p], 0, towels, lengths);
     } 
@@ -58,7 +82,18 @@ template <typename T>
 auto part2(T& input)
 {
     aoc::timer timer;
-    return 0;
+
+    auto towels = aoc::split(input[0], ",");
+    sort(towels.begin(), towels.end(), [](auto a, auto b){ return a.size() > b.size(); });
+
+    uint64_t count{};
+    for (auto p: aoc::range(1U, input.size()))
+    {
+        map<size_t, size_t> counts;
+        count += is_possible2(input[p], 0, towels, counts);
+    } 
+
+    return count;
 }
 
 
