@@ -80,6 +80,7 @@ auto part2(T& input)
     sort(towels.begin(), towels.end(), [](auto a, auto b){ return a.size() > b.size(); });
 
     uint64_t count{};
+    uint32_t possible{};
     for (auto p: aoc::range(1U, input.size()))
     {
         // Count how many ways there are to match the tail of the required pattern, and 
@@ -89,9 +90,12 @@ auto part2(T& input)
         for (auto i: aoc::range(input[p].size()))
             count_the_ways(input[p], i, towels, counts);
 
-        count += counts[input[p].size() - 1U];
+        auto ways = counts[input[p].size() - 1U];
+        count    += ways;
+        possible += (ways > 0);
     } 
 
+    cout << possible << endl;
     return count;
 }
 
