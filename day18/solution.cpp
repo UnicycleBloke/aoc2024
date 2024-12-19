@@ -10,8 +10,13 @@ constexpr int Corrupt   = -1;
 // constexpr size_t Steps = 12;
 
 // For the problem 
-constexpr size_t Rows  = 71;
-constexpr size_t Cols  = 71;
+// constexpr size_t Rows  = 71;
+// constexpr size_t Cols  = 71;
+// constexpr size_t Steps = 1024;
+
+// For the challenge 
+constexpr size_t Rows  = 213;
+constexpr size_t Cols  = 213;
 constexpr size_t Steps = 1024;
 
 
@@ -95,15 +100,26 @@ auto part2(T& input)
 
     // Surely there is a better way than repeating the simulation.
     // At least a binary chop would reduce the number of runs.
-    for (auto steps: aoc::range(Steps, input.size()))
+
+    int lo_steps = Steps;
+    int hi_steps = input.size() - 1;
+
+    while ((hi_steps - lo_steps) > 1)
     {
-        if (run(input, steps) == Unvisited) 
-        {
-            auto [c, r] = input[steps - 1];
-            cout << c << "," << r << endl;
-            break;
-        }
+        int steps = lo_steps + (hi_steps - lo_steps) / 2;
+        cout << steps << "/" << input.size() << endl;
+
+        if (run(input, steps) == Unvisited)
+            hi_steps = steps;
+        else
+            lo_steps = steps; 
     }
+
+    auto [c1, r1] = input[lo_steps];
+    cout << lo_steps << ": " << c1 << "," << r1 << " " << run(input, lo_steps) << endl;
+
+    auto [c2, r2] = input[hi_steps];
+    cout << hi_steps << ": " << c2 << "," << r2 << " " << run(input, hi_steps) << endl;
 
     return 0;
 }

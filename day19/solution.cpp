@@ -63,6 +63,36 @@ uint64_t is_possible2(const string pattern, size_t offset, const vector<string>&
 }
 
 
+uint64_t count_the_ways(const string pattern, size_t offset, const vector<string>& towels, map<size_t, size_t>& counts)
+{
+    auto start = pattern.size() - (offset + 1); 
+    auto size  = offset + 1;
+
+    uint64_t result{};
+    for (const auto& t: towels)
+    {       
+        size_t len = t.size();
+        if (size < len) continue;
+
+        bool matched = true;
+        for (auto i: aoc::range(len))
+        {
+            matched = matched && (pattern[start + i] == t[i]); 
+        }
+
+        if (matched)
+        {
+            //cout << "matched " << t << "" << endl;
+            result += (size == len) ? 1 : counts[offset - len];
+        }
+    }
+
+    //cout << "offset=" << offset << " ways=" << result << endl;
+    counts[offset] = result;
+    return result;
+}
+
+
 template <typename T>
 auto part1(const T& input)
 {
@@ -91,16 +121,23 @@ auto part2(T& input)
     auto towels = aoc::split(input[0], ",");
     sort(towels.begin(), towels.end(), [](auto a, auto b){ return a.size() > b.size(); });
 
-    uint64_t count{};
+   uint64_t count{};
     for (auto p: aoc::range(1U, input.size()))
     {
+        //cout << p << " " << input[p] << endl;
+
         set<size_t> lengths;
         if (is_possible(input[p], 0, towels, lengths))
         {
             map<size_t, size_t> counts;
-            count += is_possible2(input[p], 0, towels, counts);
-            cout << count << endl;
+            for (auto i: aoc::range(input[p].size()))
+            {
+                count_the_ways(input[p], i, towels, counts);
+            }
+            count += counts[input[p].size() - 1U];
+            // for (auto [k, v]: counts) cout << k << " " << v << endl; cout << endl;
         }
+
     } 
 
     return count;
