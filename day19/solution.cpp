@@ -14,9 +14,7 @@ bool is_possible(const string pattern, size_t offset, const vector<string>& towe
 
         bool matched = true;
         for (auto i: aoc::range(len))
-        {
             matched = matched && (pattern[offset + i] == t[i]); 
-        }
 
         if (matched)
         {
@@ -26,40 +24,6 @@ bool is_possible(const string pattern, size_t offset, const vector<string>& towe
     }
 
     return false;
-}
-
-
-uint64_t is_possible2(const string pattern, size_t offset, const vector<string>& towels, map<size_t, size_t>& counts)
-{
-    if (offset == pattern.size()) return 1;
-    if (counts.find(offset) != counts.end()) return counts[offset];
-
-    auto size = pattern.size() - offset;
-
-    set<size_t> lengths;
-
-    uint64_t result{};
-    for (const auto& t: towels)
-    {       
-        size_t len = t.size();
-        if (size < len) continue;
-        // Already matched with this length
-        if (lengths.find(len) != lengths.end()) continue;
-
-        bool matched = true;
-        for (auto i: aoc::range(len))
-        {
-            matched = matched && (pattern[offset + i] == t[i]); 
-        }
-
-        if (matched)
-        {
-            lengths.insert(len);
-            result += is_possible2(pattern, offset + len, towels, counts);
-        }
-    }
-
-    return result;
 }
 
 
@@ -76,18 +40,12 @@ uint64_t count_the_ways(const string pattern, size_t offset, const vector<string
 
         bool matched = true;
         for (auto i: aoc::range(len))
-        {
             matched = matched && (pattern[start + i] == t[i]); 
-        }
-
+ 
         if (matched)
-        {
-            //cout << "matched " << t << "" << endl;
             result += (size == len) ? 1 : counts[offset - len];
-        }
     }
 
-    //cout << "offset=" << offset << " ways=" << result << endl;
     counts[offset] = result;
     return result;
 }
@@ -121,23 +79,17 @@ auto part2(T& input)
     auto towels = aoc::split(input[0], ",");
     sort(towels.begin(), towels.end(), [](auto a, auto b){ return a.size() > b.size(); });
 
-   uint64_t count{};
+    uint64_t count{};
     for (auto p: aoc::range(1U, input.size()))
     {
-        //cout << p << " " << input[p] << endl;
+        // Count how many ways there are to match the tail of the required pattern, and 
+        // increment the tail length until the whole pattern is matched. Could make this 
+        // recursive and deal with the ordering auto-magically, but this is fine.
+        map<size_t, size_t> counts;
+        for (auto i: aoc::range(input[p].size()))
+            count_the_ways(input[p], i, towels, counts);
 
-        set<size_t> lengths;
-        if (is_possible(input[p], 0, towels, lengths))
-        {
-            map<size_t, size_t> counts;
-            for (auto i: aoc::range(input[p].size()))
-            {
-                count_the_ways(input[p], i, towels, counts);
-            }
-            count += counts[input[p].size() - 1U];
-            // for (auto [k, v]: counts) cout << k << " " << v << endl; cout << endl;
-        }
-
+        count += counts[input[p].size() - 1U];
     } 
 
     return count;
