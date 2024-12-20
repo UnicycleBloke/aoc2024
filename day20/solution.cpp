@@ -1,10 +1,8 @@
 #include "utils.h"
 
 
-int run(vector<string> grid, int tick_cheat, char dir_cheat)
+int run(vector<string>& grid)
 {
-    //aoc::timer timer;
-
     int Rows = grid.size();
     int Cols = grid[0].size();
 
@@ -32,45 +30,23 @@ int run(vector<string> grid, int tick_cheat, char dir_cheat)
     front.insert({rs, cs});
     costs[{rs, cs}] = 0;
 
-    int tick = -1;
     while (front.size() > 0)
     {        
-        ++tick;
-
         set<pair<int, int>> front2;
         for (auto [r, c]: front)
         {
-            if ((r == re) && (c == ce)) 
-                return tick;
-
             visited.insert({r, c});
 
             if ((grid[r][c] == '#'))
                 continue;
 
-            if (tick == tick_cheat)
-            {
-                switch (dir_cheat)
-                {
-                    case 'N': if (r > 0)          grid[r - 1][c] = '.'; break;
-                    case 'S': if (r < (Rows - 1)) grid[r + 1][c] = '.'; break;
-                    case 'E': if (c < (Cols - 1)) grid[r][c + 1] = '.'; break;
-                    case 'W': if (c > 0)          grid[r][c - 1] = '.'; break;
-                }
-            }
-
-
-            // //bool can_cheat = (tick == tick_cheat) || (tick == (tick_cheat + 1));
-            // //bool can_cheat = (tick == (tick_cheat + 1));
-            // bool can_cheat = (tick == tick_cheat);
-            // if ((grid[r][c] == '#') && !can_cheat)
-            //     continue;
-
             int steps = costs[{r, c}] + 1;
-            //cout << r << " " << c << " " << grid[r][c] << steps << endl;
 
             auto make_step = [&](int dr, int dc)
             { 
+                if ((grid[r + dr][c + dc] == '#'))
+                    return;
+
                 if (costs.find({r + dr, c + dc}) == costs.end())
                     costs[{r + dr, c + dc}] = steps;
                 else
@@ -92,7 +68,51 @@ int run(vector<string> grid, int tick_cheat, char dir_cheat)
         front = front2;
     }
 
-    return tick;
+    // for (int r1: aoc::range(Rows))
+    // {
+    //     for (int c1: aoc::range(Cols))
+    //     {
+    //         cout << grid[r1][c1] << costs[{r1, c1}] << "  ";
+    //     }
+    //     cout << endl;
+    // }
+    // cout << endl;
+
+    set<tuple<int,int,int,int>> cheats;
+
+    for (int r1: aoc::range(Rows))
+    {
+        for (int c1: aoc::range(Cols))
+        {
+            if (grid[r1][c1] != '#')
+            {
+                int cost1 = costs[{r1, c1}];
+                for (int rd: aoc::range(-2, 2+1))
+                {
+                    for (int cd: aoc::range(-2, 2+1))
+                    {
+                        int cheat = abs(rd) + abs(cd);
+                        if (cheat <= 2)
+                        {
+                            auto r2 = r1 + rd;
+                            auto c2 = c1 + cd;
+                            if ((r2 >= 0) && (c2 >= 0) && (r2 < Rows) && (c2 < Cols) && (grid[r2][c2] != '#'))
+                            {
+                                int cost2 = costs[{r2, c2}];
+                                if (cost2 > (cost1 + cheat + 99))
+                                {
+                                    cheats.insert({r1, c1, r2, c2});
+                                    //cout << cost1 << " " << cost2 << " " << (cost2 - cost1) << ": " << result << endl;
+                                }
+                            }    
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return cheats.size();
 }
 
 
@@ -100,41 +120,7 @@ template <typename T>
 auto part1(const T& input)
 {
     aoc::timer timer;
-
-    int result = 0;
-    int base   = run(input, -2, 'N') - 99;
-    cout << base << endl;
-
-    map<int, int> saves;
-    for (auto t: aoc::range(0, base))
-    {        
-        cout << t << endl;
-
-        {
-            int tick = run(input, t, 'N');
-            saves[base - tick] = saves[base - tick] + 1;
-            result += (base > tick);
-        }
-        {
-            int tick = run(input, t, 'S');
-            saves[base - tick] = saves[base - tick] + 1;
-            result += (base > tick);
-        }
-        {
-            int tick = run(input, t, 'E');
-            saves[base - tick] = saves[base - tick] + 1;
-            result += (base > tick);
-        }
-        {
-            int tick = run(input, t, 'W');
-            saves[base - tick] = saves[base - tick] + 1;
-            result += (base > tick);
-        }
-    }
-
-    for (auto [k, v]: saves) cout << k << " " << v << endl; cout << endl;
-
-    return result;
+    return 0;
 }
 
 
@@ -142,7 +128,7 @@ template <typename T>
 auto part2(T& input)
 {
     aoc::timer timer;
-    return 0;
+    return run(input);
 }
 
 
