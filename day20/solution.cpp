@@ -82,8 +82,7 @@ int run(vector<string>& grid, int cheat_time, int cheat_offset)
                 for (int cd: aoc::range(-cheat_time, cheat_time+1))
                 {
                     auto c2 = c1 + cd;
-                    if ((c2 < 0) || (c2 >= Cols)) continue;
-                    if (grid[r2][c2] == '#') continue;
+                    if ((c2 < 0) || (c2 >= Cols) || (grid[r2][c2] == '#')) continue;
 
                     int cheat = abs(rd) + abs(cd);
                     if (cheat <= cheat_time)
