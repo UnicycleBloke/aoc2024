@@ -1,7 +1,7 @@
 #include "utils.h"
 
 
-int run(vector<string>& grid)
+int run(vector<string>& grid, int cheat_time, int cheat_offset)
 {
     int Rows = grid.size();
     int Cols = grid[0].size();
@@ -68,17 +68,8 @@ int run(vector<string>& grid)
         front = front2;
     }
 
-    // for (int r1: aoc::range(Rows))
-    // {
-    //     for (int c1: aoc::range(Cols))
-    //     {
-    //         cout << grid[r1][c1] << costs[{r1, c1}] << "  ";
-    //     }
-    //     cout << endl;
-    // }
-    // cout << endl;
-
     set<tuple<int,int,int,int>> cheats;
+    //map<int, int> counts;
 
     for (int r1: aoc::range(Rows))
     {
@@ -87,22 +78,23 @@ int run(vector<string>& grid)
             if (grid[r1][c1] != '#')
             {
                 int cost1 = costs[{r1, c1}];
-                for (int rd: aoc::range(-2, 2+1))
+                for (int rd: aoc::range(-cheat_time, cheat_time+1))
                 {
-                    for (int cd: aoc::range(-2, 2+1))
+                    for (int cd: aoc::range(-cheat_time, cheat_time+1))
                     {
                         int cheat = abs(rd) + abs(cd);
-                        if (cheat <= 2)
+                        if (cheat <= cheat_time)
                         {
                             auto r2 = r1 + rd;
                             auto c2 = c1 + cd;
                             if ((r2 >= 0) && (c2 >= 0) && (r2 < Rows) && (c2 < Cols) && (grid[r2][c2] != '#'))
                             {
                                 int cost2 = costs[{r2, c2}];
-                                if (cost2 > (cost1 + cheat + 99))
+                                if (cost2 > (cost1 + cheat + cheat_offset))
                                 {
+                                    // int save = cost2 - (cost1 + cheat);
+                                    // counts[save] = counts[save] + 1;
                                     cheats.insert({r1, c1, r2, c2});
-                                    //cout << cost1 << " " << cost2 << " " << (cost2 - cost1) << ": " << result << endl;
                                 }
                             }    
                         }
@@ -112,23 +104,31 @@ int run(vector<string>& grid)
         }
     }
 
+    // for (auto [save, count]: counts)
+    //     cout << count << " " << save << endl;
+    // cout << endl;
+
     return cheats.size();
 }
 
 
 template <typename T>
-auto part1(const T& input)
+auto part1(T input)
 {
     aoc::timer timer;
-    return 0;
+    // Example
+    //return run(input, 2, 0);
+    return run(input, 2, 99);
 }
 
 
 template <typename T>
-auto part2(T& input)
+auto part2(T input)
 {
     aoc::timer timer;
-    return run(input);
+    // Example
+    //return run(input, 20, 49);
+    return run(input, 20, 99);
 }
 
 
