@@ -36,16 +36,12 @@ int run(vector<string>& grid, int cheat_time, int cheat_offset)
         for (auto [r, c]: front)
         {
             visited.insert({r, c});
-
-            if ((grid[r][c] == '#'))
-                continue;
+            if ((grid[r][c] == '#')) continue;
 
             int steps = costs[{r, c}] + 1;
-
             auto make_step = [&](int dr, int dc)
             { 
-                if ((grid[r + dr][c + dc] == '#'))
-                    return;
+                if ((grid[r + dr][c + dc] == '#')) return;
 
                 if (costs.find({r + dr, c + dc}) == costs.end())
                     costs[{r + dr, c + dc}] = steps;
@@ -75,30 +71,31 @@ int run(vector<string>& grid, int cheat_time, int cheat_offset)
     {
         for (int c1: aoc::range(Cols))
         {
-            if (grid[r1][c1] != '#')
+            if (grid[r1][c1] == '#') continue;
+
+            int cost1 = costs[{r1, c1}];
+            for (int rd: aoc::range(-cheat_time, cheat_time+1))
             {
-                int cost1 = costs[{r1, c1}];
-                for (int rd: aoc::range(-cheat_time, cheat_time+1))
+                auto r2 = r1 + rd;
+                if ((r2 < 0) || (r2 >= Rows)) continue;
+
+                for (int cd: aoc::range(-cheat_time, cheat_time+1))
                 {
-                    for (int cd: aoc::range(-cheat_time, cheat_time+1))
+                    auto c2 = c1 + cd;
+                    if ((c2 < 0) || (c2 >= Cols)) continue;
+                    if (grid[r2][c2] == '#') continue;
+
+                    int cheat = abs(rd) + abs(cd);
+                    if (cheat <= cheat_time)
                     {
-                        int cheat = abs(rd) + abs(cd);
-                        if (cheat <= cheat_time)
+                        int cost2 = costs[{r2, c2}];
+                        if (cost2 > (cost1 + cheat + cheat_offset))
                         {
-                            auto r2 = r1 + rd;
-                            auto c2 = c1 + cd;
-                            if ((r2 >= 0) && (c2 >= 0) && (r2 < Rows) && (c2 < Cols) && (grid[r2][c2] != '#'))
-                            {
-                                int cost2 = costs[{r2, c2}];
-                                if (cost2 > (cost1 + cheat + cheat_offset))
-                                {
-                                    // int save = cost2 - (cost1 + cheat);
-                                    // counts[save] = counts[save] + 1;
-                                    cheats.insert({r1, c1, r2, c2});
-                                }
-                            }    
+                            // int save = cost2 - (cost1 + cheat);
+                            // counts[save] = counts[save] + 1;
+                            cheats.insert({r1, c1, r2, c2});
                         }
-                    }
+                    }    
                 }
             }
         }
