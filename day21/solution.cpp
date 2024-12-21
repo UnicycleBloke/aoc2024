@@ -142,11 +142,17 @@ void analyse(const string& sequence)
 }
 
 
+KeyBoard pad{4, 3, "789456123*0A" };
+KeyBoard dir1{2, 3, "*^A<v>" };
+KeyBoard dir2{2, 3, "*^A<v>" };
+KeyBoard dir3{2, 3, "*^A<v>" };
+
+
 int calculate(const string& code)
 {
-    auto pad  = keypad;
-    auto dir1 = dirpad;
-    auto dir2 = dirpad;
+    // auto pad  = keypad;
+    // auto dir1 = dirpad;
+    // auto dir2 = dirpad;
 
     cout << code << ": " << code.size() << ": " << code << endl;
     auto seq1 = pad.enter(code);   
