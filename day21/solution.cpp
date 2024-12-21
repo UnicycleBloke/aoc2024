@@ -1,5 +1,7 @@
 #include "utils.h"
 
+
+// Represents one of the keypads used in the problem.
 struct KeyBoard
 {
     using Point = pair<int, int>;
@@ -10,6 +12,7 @@ struct KeyBoard
     int prow;
     int pcol;
 
+    // Construct from an array of characters.
     KeyBoard(int rows, int cols, const char* data)
     {
         for (auto r: aoc::range(rows))
@@ -30,92 +33,60 @@ struct KeyBoard
         pcol = col;
     }
 
-    string enter(const string& sequence)
+    // Used to eliminate paths which pass through the forbidden space.
+    bool is_valid_path(const string& moves)
     {
-        ostringstream os;
-        for (auto c: sequence)
-            os << press(c);
-        return os.str();
+        int row1 = row;
+        int col1 = col;
+        for (char m: moves)
+        {
+            switch (m)
+            {
+                case '<': col1 -= 1; break;
+                case '>': col1 += 1; break;
+                case '^': row1 -= 1; break;
+                case 'v': row1 += 1; break;
+            }
+            if (keys2[{row1, col1}] == '*') return false;
+        }
+        return true;
     }
 
-    string panic()
+    void move_to(char key)
     {
-        return (keys2[{row, col}] == '*') ? " panic" : "";
+        auto [row2, col2] = keys[key];
+        col = col2;
+        row = row2;
     }
 
-    void dump(char key)
-    {
-        // cout << key << ": (" << prow << ", " << pcol << ") " << keys2[{prow, pcol}]; 
-        // cout << " -> (" << row << ", " << col << ") " << keys2[{row, col}] << " " << panic() << endl;
-        // prow = row;
-        // pcol = col;
-    }
-
-    string press(char key)
+    // Enumerate all the possible paths from the current position to the new position.
+    // The shortest distance is basically a Manhattan path, but we may have several places
+    // in which to go left or right before reaching the end.
+    vector<string> get_paths(char key)
     {
         ostringstream os;
         auto [row2, col2] = keys[key];
 
-        auto move_horz = [&]()
-        {
-            while (col2 != col)
-            {
-                auto dir = aoc::sgn(col2 - col);
-                switch (dir)
-                {
-                    case +1: os << '>'; break;
-                    case -1: os << '<'; break;
-                }
-                col += dir;
-                dump(key);
-            }
-        };
+        // A straightforward Manhattan path.
+        for (auto i: aoc::range(abs(col2 - col)))
+            os << ((aoc::sgn(col2 - col) < 0) ? '<' : '>');
+        for (auto i: aoc::range(abs(row2 - row)))
+            os << ((aoc::sgn(row2 - row) < 0) ? '^' : 'v');
 
-        auto move_vert = [&]()
+        // Permute to obtain all possibilities.
+        vector<string> paths;
+        string path = os.str();
+        sort(path.begin(), path.end());
+        do
         {
-            while (row2 != row)
-            {
-                auto dir = aoc::sgn(row2 - row);
-                switch (dir)
-                {
-                    case +1: os << 'v'; break;
-                    case -1: os << '^'; break;
-                }
-                row += dir;
-                dump(key);
-            }
-        };
-
-        // if (col == col2)
-        // {
-        //     move_vert();
-        // }
-        // else if (row == row2)
-        // {
-        //     move_horz();
-        // }
-        // else if (keys2[{row, col2}] == '*')
-        if (keys2[{row, col2}] == '*')
-        {
-            // Move to {row2, col} first
-            move_vert();
-            move_horz();
+            if (is_valid_path(path))
+                paths.push_back(path + "A");
         }
-        else
-        {
-            move_horz();
-            move_vert();
-        }
+        while (next_permutation(path.begin(), path.end()));
 
-        //cout << endl;
-        os << 'A';
-        return os.str();
+        return paths;
     }
 };
-
-
-const KeyBoard keypad{4, 3, "789456123*0A" };
-const KeyBoard dirpad{2, 3, "*^A<v>" };
 
 
 int number(const string& code)
@@ -130,64 +101,93 @@ int number(const string& code)
 }
 
 
-void analyse(const string& sequence)
+// Recursive evaluation of a sequence. There are relatively few sequence "atoms" (move from ButtonX to ButtonY),
+// but these expand to much longer sequences for the next bot in the chain, and so on.
+uint64_t find_min_length(const string& sequence, int depth, int max_depth, map<pair<int, string>, uint64_t>& cache)
 {
-    map<char, int> counts;
-    for (char c: sequence)
-        counts[c] = counts[c] + 1;
+    // Terminate the recursion.
+    if (depth == max_depth) 
+        return sequence.size(); 
 
-    cout << sequence << endl;
-    for (auto [c, n]: counts)
-        cout << c << " " << n << endl;
+    // Check the cache to see if we have evaluated this combination already.
+    const auto iter = cache.find({depth, sequence});
+    if (iter != cache.end())
+        return iter->second; 
+
+    uint64_t total_min_length{};
+
+    // It helps that every sequence returns to the A key to tell the next bot to push, or 
+    // we'd have to keep a separate Keyboard alive for each bot.
+    KeyBoard dir{2, 3, "*^A<v>" };
+    for (char c: sequence)
+    {
+        // Find all the possible sequences for the key.
+        auto paths = dir.get_paths(c);
+        dir.move_to(c);
+
+        // Recurse to the next bot to find the ultimate length. 
+        // Take the minimum of all of these.
+        uint64_t min_length = numeric_limits<uint64_t>::max();
+        for (const auto& p: paths)
+        {
+            uint64_t length = find_min_length(p, depth + 1, max_depth, cache);
+            min_length = min(min_length, length);
+        }
+        total_min_length += min_length;
+    }
+
+    // Update the cache.
+    cache[{depth, sequence}] = total_min_length;
+    return total_min_length;
 }
 
 
-KeyBoard pad{4, 3, "789456123*0A" };
-KeyBoard dir1{2, 3, "*^A<v>" };
-KeyBoard dir2{2, 3, "*^A<v>" };
-KeyBoard dir3{2, 3, "*^A<v>" };
-
-
-int calculate(const string& code)
+size_t find_min_length(const string& code, int max_depth)
 {
-    // auto pad  = keypad;
-    // auto dir1 = dirpad;
-    // auto dir2 = dirpad;
+    KeyBoard pad{4, 3, "789456123*0A" };
 
-    cout << code << ": " << code.size() << ": " << code << endl;
-    auto seq1 = pad.enter(code);   
-    cout << endl;
+    vector<string> all_paths;
+    all_paths.push_back("");
 
-    cout << code << ": " << seq1.size() << ": " << seq1 << endl;
-    auto seq2 = dir1.enter(seq1);
-    cout << endl;
+    // Build all top level sequences that the first bot would need to execute.
+    for (char c: code)
+    {
+        auto paths = pad.get_paths(c);
+        pad.move_to(c);
 
-    cout << code << ": " << seq2.size() << ": " << seq2 << endl;
-    auto seq3 = dir2.enter(seq2);
-    cout << endl;
+        vector<string> all_paths2;
+        for (const auto& r: all_paths)
+            for (const auto& p: paths)
+                all_paths2.push_back(r + p);
+        all_paths = all_paths2;
+    }
 
-    cout << code << ": " << seq3.size() << ": " << seq3 << endl;
+    // Cache the total path length for a given sequence and depth to avoid repetition. 
+    map<pair<int, string>, uint64_t> cache;
 
-    //analyse(seq3);
-    cout << seq3.size() << " * "<< number(code) << endl;
-    return number(code) * seq3.size();
+    // Try all the possible sequences to see which is the shortest.
+    uint64_t min_length = numeric_limits<uint64_t>::max();
+    for (const auto& path: all_paths)
+    {        
+        auto length = find_min_length(path, 0, max_depth, cache);
+        min_length = min(min_length, length);
+    }
+
+    return min_length;
 }
 
 
 template <typename T>
 auto part1(const T& input)
 {
-    aoc::timer timer;
+    aoc::timer timer;   
+    size_t result{};
 
-    int result = 0;
     for (auto code: input)
-        result += calculate(code);
-
-    // analyse("<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A");
-    // analyse("<v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A");
-    // analyse("<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A");
-    // analyse("<v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A");
-    // analyse("<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A");
+    {
+        auto length = find_min_length(code, 2);
+        result += length * number(code);
+    } 
 
     return result;
 }
@@ -196,8 +196,17 @@ auto part1(const T& input)
 template <typename T>
 auto part2(T& input)
 {
-    aoc::timer timer;
-    return 0;
+    aoc::timer timer;   
+    size_t result{};
+
+    for (auto code: input)
+    {
+        cout << code << endl;
+        auto length = find_min_length(code, 25);
+        result += length * number(code);
+    } 
+
+    return result;
 }
 
 
