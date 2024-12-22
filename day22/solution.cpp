@@ -40,6 +40,8 @@ auto part2(T& input)
     // Was previously an array of bool inside the loop, but this was slower due 
     // to numerous zero-initialisations. 
     array<int, kSequenceCap> sequences{};
+    //map<uint32_t, int> total_prices{};
+    //unordered_map<uint32_t, int> total_prices{};
     array<int, kSequenceCap> total_prices{};
     
     for (auto [secret]: input)
@@ -50,12 +52,10 @@ auto part2(T& input)
 
         for (auto i: aoc::range(2000))
         {
-            auto next = secret * 64;
-            secret = (secret ^ next) % 16777216;
-            next = secret / 32;
-            secret = (secret ^ next) % 16777216;
-            next = secret * 2048;
-            secret = (secret ^ next) % 16777216;
+            constexpr uint32_t kHashMax = 16777216;        // 1 << 24; 
+            secret = (secret ^ (secret << 6)) % kHashMax;  // * 64
+            secret = (secret ^ (secret >> 5)) % kHashMax;  // / 32
+            secret = (secret ^ (secret << 11)) % kHashMax; // * 2048
 
             int price2 = secret % 10;
             int change = price2 - price;
@@ -72,6 +72,9 @@ auto part2(T& input)
         }
     }
 
+    aoc::timer timer2;
+    //return max_element(total_prices.begin(), total_prices.end(), 
+    //    [](const auto&p1, const auto&p2){ return p1.second < p2.second; })->second;
     return *max_element(total_prices.begin(), total_prices.end());
 }
 
