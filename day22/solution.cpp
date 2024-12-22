@@ -36,15 +36,17 @@ auto part2(T& input)
 
     aoc::timer timer;
 
+    // Use an array of int to mark the sequences already seen for current buyer.
+    // Was previously an array of bool inside the loop, but this was slower due 
+    // to numerous zero-initialisations. 
+    array<int, kSequenceCap> sequences{};
     array<int, kSequenceCap> total_prices{};
     
     for (auto [secret]: input)
     {
+        int      buyer    = secret;
         int      price    = secret % 10;
         int      sequence = 0;
-
-        // Use an array of bool to mark the sequences already seen for this buyer.
-        array<bool, kSequenceCap> sequences{};
 
         for (auto i: aoc::range(2000))
         {
@@ -62,9 +64,9 @@ auto part2(T& input)
             // Store the sequence as a 4-digit base-19 number.
             sequence = (sequence * 19 + change + 9) % kSequenceCap;
 
-            if (!sequences[sequence])
+            if (sequences[sequence] != buyer)
             {
-                sequences[sequence] = true;                            
+                sequences[sequence] = buyer;                            
                 total_prices[sequence] += price;
             }
         }
