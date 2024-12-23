@@ -39,7 +39,7 @@ auto part1(const T& input)
 }
 
 
-bool can_grow_cluster(const set<string>& cluster, const string& extra, map<string, vector<string>>& neighbours)
+bool can_grow_cluster(const set<int>& cluster, const int extra, map<int, vector<int>>& neighbours)
 {
     // Every node in the cluster must be a neighbour of extra for exta to be able to extend the cluster.
     const auto& n = neighbours[extra];
@@ -51,14 +51,14 @@ bool can_grow_cluster(const set<string>& cluster, const string& extra, map<strin
 }
 
 
-void grow_cluster(const set<string>& cluster, map<string, vector<string>>& neighbours, set<string>& consumed, set<string>& max_cluster)
+void grow_cluster(const set<int>& cluster, map<int, vector<int>>& neighbours, set<int>& consumed, set<int>& max_cluster)
 {
     // Have found a larger subgraph?
     if (cluster.size() > max_cluster.size())
         max_cluster = cluster;
 
     // Set of potential extensions to the cluster.
-    set<string> extra;
+    set<int> extra;
     for (const auto& p: cluster)
     {
         for (const auto& n: neighbours[p])
@@ -93,38 +93,55 @@ void grow_cluster(const set<string>& cluster, map<string, vector<string>>& neigh
 }
 
 
+int to_int(const string& p)
+{
+    return (p[0] - 'a') * 256 + (p[1] - 'a');
+}
+
+
+void print(int p)
+{
+    char c1 = 'a' + (p / 256);
+    char c2 = 'a' + (p % 256);
+    cout << c1 << c2 << ",";
+}
+
+
 template <typename T>
 auto part2(T& input)
 {
     aoc::timer timer;
 
     // Build the set of immediate neighbours for each node.
-    map<string, vector<string>> neighbours;
+    map<int, vector<int>> neighbours;
     for (auto [p1, p2]: input)
     {        
-        neighbours[p1].push_back(p2);
-        neighbours[p2].push_back(p1);
+        int i1 = to_int(p1);
+        int i2 = to_int(p2);
+        neighbours[i1].push_back(i2);
+        neighbours[i2].push_back(i1);
     }
 
-    set<string> max_cluster;
+    set<int> max_cluster;
     
     // Use a greedy algorithm to grow a fully connnected (aka complete) subgraph from each node. 
     // Each node can be in multiple complete subgraphs but only one maximal complete subgraph. A
     // maximal subgraph is one which cannot be further extended. This means that once we find a 
     // maximal subgraph containing P, we can regard P as unavailable for other subgraphs - consumed.
-    set<string> consumed;
+    set<int> consumed;
     for (const auto& [p, v]: neighbours)     
     {
         if (consumed.find(p) != consumed.end()) continue;
 
         // Seed cluster 
-        set<string> cluster;
+        set<int> cluster;
         cluster.insert(p);
         grow_cluster(cluster, neighbours, consumed, max_cluster);
     }
 
     for (const auto& p: max_cluster)
-        cout << p << ","; 
+        print(p);
+        //cout << p << ","; 
     cout << endl;
 
     return max_cluster.size();
