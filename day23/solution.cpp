@@ -50,7 +50,9 @@ bool is_cluster(const set<string>& cluster, const string& extra, map<string, vec
     return true;
 }
 
+
 set<string> max_cluster;
+
 
 void find_cluster(const set<string>& cluster, map<string, vector<string>>& neighbours, const set<string>& visited)
 {
@@ -84,6 +86,38 @@ void find_cluster(const set<string>& cluster, map<string, vector<string>>& neigh
 }
 
 
+set<set<string>> extend_cluster(const set<string>& cluster, map<string, vector<string>>& neighbours, const set<string>& visited)
+{
+    // Set of potential extensions to the cluster.
+    set<string> extra;
+    for (const auto& p: cluster)
+    {
+        for (const auto& p2: neighbours[p])
+        {
+            // We already tried to grow a cluster from here.
+            if (visited.find(p2) != visited.end()) continue;
+            // We already have this node in the cluster.
+            if (cluster.find(p2) != cluster.end()) continue; 
+            extra.insert(p2);
+        }
+    }
+
+    set<set<string>> clusters;
+    for (const auto& e: extra)
+    {
+        if (is_cluster(cluster, e, neighbours))
+        {
+            auto cluster2 = cluster;
+            cluster2.insert(e);
+            clusters.insert(cluster2);
+        }
+    }
+
+    return clusters;
+}
+
+
+
 template <typename T>
 auto part2(T& input)
 {
@@ -95,14 +129,52 @@ auto part2(T& input)
     }
 
     set<string> visited;
-    for (const auto& [p, v]: neighbours)     
+    for (const auto& [p1, v]: neighbours)     
     {
-        set<string> cluster;
-        cluster.insert(p);
-        find_cluster(cluster, neighbours, visited);
+        set<string> c1;
+        c1.insert(p1);
 
-        visited.insert(p);
+        auto clusters2 = extend_cluster(c1, neighbours, visited);
+        for (const auto& c2: clusters2)
+        {
+            for (const auto& p2: c2)
+                cout << p2 << ",";
+            cout << endl;
+
+            auto clusters3 = extend_cluster(c2, neighbours, visited);
+            for (const auto& c3: clusters3)
+            {
+                for (const auto& p3: c3)
+                    cout << p3 << ",";
+                cout << endl;
+
+                auto clusters4 = extend_cluster(c3, neighbours, visited);
+                for (const auto& c4: clusters4)
+                {
+                    for (const auto& p4: c4)
+                        cout << p4 << ",";
+                    cout << endl;
+                }
+                cout << endl;
+
+            }
+            cout << endl;
+        }
+        cout << endl;
+
+        visited.insert(p1);
     }
+
+
+    // set<string> visited;
+    // for (const auto& [p, v]: neighbours)     
+    // {
+    //     set<string> cluster;
+    //     cluster.insert(p);
+    //     find_cluster(cluster, neighbours, visited);
+
+    //     visited.insert(p);
+    // }
 
 
     // for (const auto& [p, v]: neighbours)     
