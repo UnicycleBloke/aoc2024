@@ -41,41 +41,44 @@ auto part1(const T& input)
 
 bool is_cluster(const set<string>& cluster, const string& extra, map<string, vector<string>>& neighbours)
 {
+    // Every element of the cluster must be a neighbour of extra for exta to be able to extend the cluster.
     const auto& v = neighbours[extra];
     for (const auto& p: cluster)
     {
         if (find(v.begin(), v.end(), p) == v.end()) return false;
     }
-
     return true;
 }
 
 set<string> max_cluster;
 
-void find_cluster(const set<string>& cluster, map<string, vector<string>>& neighbours)
+void find_cluster(const set<string>& cluster, map<string, vector<string>>& neighbours, const set<string>& visited)
 {
-    cout << cluster.size() << endl;
-
     if (cluster.size() > max_cluster.size())
         max_cluster = cluster;
 
-    // Set of potential additions.
+    // Set of potential extensions to the cluster.
     set<string> extra;
     for (const auto& p: cluster)
     {
         for (const auto& p2: neighbours[p])
         {
-            if (cluster.find(p2) == cluster.end()) extra.insert(p2);
+            // We already tried to grow a cluster from here.
+            if (visited.find(p2) != visited.end()) continue;
+            // We already have this node in the cluster.
+            if (cluster.find(p2) != cluster.end()) continue; 
+            extra.insert(p2);
         }
     }
 
+    // Try each extra node in turn and recurse if these form a cluster.
     for (const auto& e: extra)
     {
         if (is_cluster(cluster, e, neighbours))
         {
             auto cluster2 = cluster;
             cluster2.insert(e);
-            find_cluster(cluster2, neighbours);
+            find_cluster(cluster2, neighbours, visited);
         }
     }
 }
@@ -91,30 +94,41 @@ auto part2(T& input)
         neighbours[p2].push_back(p1);
     }
 
+    set<string> visited;
     for (const auto& [p, v]: neighbours)     
     {
         set<string> cluster;
         cluster.insert(p);
-        for (const auto& n: v) cluster.insert(n);
+        find_cluster(cluster, neighbours, visited);
 
-        bool is_cluster = true;
-        for (const auto& n: v) 
-        {
-            const auto& v2 = neighbours[n];
-            for (const auto& n2: v2) 
-            {
-                if (n2 == n) continue;
-                is_cluster &= (find(v2.begin(), v2.end(), n2) != v2.end());
-            }
-        }
-
-        static int count{};
-        if (is_cluster)
-        {
-            cout << count++ << cluster.size() << ": ";
-            for (const auto& p: cluster) cout << p << ","; cout << endl;
-        }
+        visited.insert(p);
     }
+
+
+    // for (const auto& [p, v]: neighbours)     
+    // {
+    //     set<string> cluster;
+    //     cluster.insert(p);
+    //     for (const auto& n: v) cluster.insert(n);
+
+    //     bool is_cluster = true;
+    //     for (const auto& n: v) 
+    //     {
+    //         const auto& v2 = neighbours[n];
+    //         for (const auto& n2: v2) 
+    //         {
+    //             if (n2 == n) continue;
+    //             is_cluster &= (find(v2.begin(), v2.end(), n2) != v2.end());
+    //         }
+    //     }
+
+    //     static int count{};
+    //     if (is_cluster)
+    //     {
+    //         cout << count++ << cluster.size() << ": ";
+    //         for (const auto& p: cluster) cout << p << ","; cout << endl;
+    //     }
+    // }
 
     return max_cluster.size();
 }
