@@ -23,12 +23,15 @@ int run(vector<string>& grid, int cheat_time, int cheat_offset)
         }
     }
 
+    vector<uint32_t> row(Cols, 0xFFFF'FFFF);
+    vector<vector<uint32_t>> costs(Rows, row);
+
     set<pair<int, int>>      visited;
     set<pair<int, int>>      front;
-    map<pair<int, int>, int> costs;
+    //map<pair<int, int>, int> costs;
 
     front.insert({rs, cs});
-    costs[{rs, cs}] = 0;
+    costs[rs][cs] = 0;
 
     while (front.size() > 0)
     {        
@@ -38,15 +41,11 @@ int run(vector<string>& grid, int cheat_time, int cheat_offset)
             visited.insert({r, c});
             if ((grid[r][c] == '#')) continue;
 
-            int steps = costs[{r, c}] + 1;
+            auto steps = costs[r][c] + 1;
             auto make_step = [&](int dr, int dc)
             { 
                 if ((grid[r + dr][c + dc] == '#')) return;
-
-                if (costs.find({r + dr, c + dc}) == costs.end())
-                    costs[{r + dr, c + dc}] = steps;
-                else
-                    costs[{r + dr, c + dc}] = min(steps, costs[{r + dr, c + dc}]);
+                costs[r + dr][c + dc] = min(steps, costs[r + dr][c + dc]);
 
                 int r2 = r + dr; 
                 int c2 = c + dc; 
@@ -73,7 +72,7 @@ int run(vector<string>& grid, int cheat_time, int cheat_offset)
         {
             if (grid[r1][c1] == '#') continue;
 
-            int cost1 = costs[{r1, c1}];
+            auto cost1 = costs[r1][c1];
             for (int rd: aoc::range(-cheat_time, cheat_time+1))
             {
                 auto r2 = r1 + rd;
@@ -84,10 +83,10 @@ int run(vector<string>& grid, int cheat_time, int cheat_offset)
                     auto c2 = c1 + cd;
                     if ((c2 < 0) || (c2 >= Cols) || (grid[r2][c2] == '#')) continue;
 
-                    int cheat = abs(rd) + abs(cd);
+                    auto cheat = abs(rd) + abs(cd);
                     if (cheat <= cheat_time)
                     {
-                        int cost2 = costs[{r2, c2}];
+                        auto cost2 = costs[r2][c2];
                         if (cost2 > (cost1 + cheat + cheat_offset))
                         {
                             // int save = cost2 - (cost1 + cheat);
