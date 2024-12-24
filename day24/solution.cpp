@@ -4,7 +4,7 @@
 template <typename T, typename U>
 auto part1(const T& init, const U& gates)
 {
-    //aoc::timer timer;
+    aoc::timer timer;
 
     map<string, int> values;
     for (const auto& [wire, value]: init) 
@@ -63,104 +63,98 @@ auto part2(const T& init, const U& gates)
 {
     aoc::timer timer;
 
-    map<string, tuple<string, string, string>> expressions;
+    map<tuple<string, string, string>, string> logic;
     for (const auto& [w1, gate, w2, w3]: gates)
     {
-        expressions[w3] = make_tuple(w1, w2, gate);
+        logic[make_tuple(w1, w2, gate)] = w3;
     }
 
-
-    for (auto i: aoc::range(46))
+    map<string, string> swaps;
+    auto find_swap = [&](string v1)
     {
-        char buffer[8];
+        if (swaps.find(v1) != swaps.end()) return swaps[v1];
+        return v1;
+    };
+
+    auto add_swap = [&](string v1, string v2)    
+    {
+        cout << "Added swap: " << v1 << " " << v2 << endl;
+        swaps[v1] = v2;
+        swaps[v2] = v1;
+    };
+
+    add_swap("z07", "bjm");
+    add_swap("z13", "hsw");
+    add_swap("z18", "skf");
+    add_swap("nvr", "wkr");
+
+    auto find_gate = [&](string v1, string v2, string g)
+    {
+        auto t1 = make_tuple(v1, v2, g);
+        auto t2 = make_tuple(v2, v1, g);
+        if (logic.find(t1) != logic.end())
+        {
+            auto result = find_swap(logic[t1]);
+            cout << "Found: " << v1 << " " << g << " " << v2 << " -> " << result << endl;
+            return result;
+        } 
+        if (logic.find(t2) != logic.end())
+        {
+            auto result = find_swap(logic[t2]);
+            cout << "Found: " << v2 << " " << g << " " << v1 << " -> " << result << endl;
+            return result;
+        } 
+
+        cout << "ERROR: " << v1 << " " << g << " " << v2 << " -> ***" << endl;
+        return string{"***"};
+    };
+
+    auto zbit = find_gate("x00", "y00", "XOR");
+    auto cbit = find_gate("x00", "y00", "AND");
+    if (zbit != "z00") cout << "Error z00\n";
+    if (cbit.size() == 0) cout << "Error c00\n";
+
+    int i = 1;
+    while (i < 45)
+    //for (auto i: aoc::range(1, 45))
+    {
+        char buffer[64];
         sprintf(buffer, "%02d", i);  
+        string xbit = "x" + string(buffer); 
+        string ybit = "y" + string(buffer); 
+        string zbit = "z" + string(buffer); 
 
-        set<string> wires;
-        set<tuple<string, string, string, string>> sub_gates;
-        wires.insert("x" + string(buffer));
-        wires.insert("y" + string(buffer));
-        //wires.insert("z" + string(buffer));
+        cout << "INP: " << xbit << " " << ybit << " " << cbit << endl;
 
-        for (const auto& [w1, gate, w2, w3]: gates)
-        {
-            if (wires.find(w1) != wires.end() || wires.find(w2) != wires.end())
-            {
-                wires.insert(w3);
-                sub_gates.insert(make_tuple(w1, gate, w2, w3));
-            } 
-        }
-        for (const auto& [w1, gate, w2, w3]: gates)
-        {
-            if (wires.find(w1) != wires.end() || wires.find(w2) != wires.end())
-            {
-                wires.insert(w3);
-                sub_gates.insert(make_tuple(w1, gate, w2, w3));
-            } 
-        }
+        auto xor1 = find_gate(xbit, ybit, "XOR");
+        auto and1 = find_gate(xbit, ybit, "AND");
+        auto xor2 = find_gate(xor1, cbit, "XOR");
+        auto and2 = find_gate(xor1, cbit, "AND");
+        auto or1  = find_gate(and1, and2, "OR");
 
-        for (const auto& [w1, gate, w2, w3]: sub_gates)
-            cout << w3 << " = (" << w1 << " " << gate << " " << w2 << ")" << endl; 
+        // if ((xor2 != zbit) && (and2 == zbit))
+        // {
+        //     add_swap(xor2, zbit);
+        //     continue;
+        // }
+        // if ((xor2 != zbit) && (or1 == zbit))
+        // {
+        //     add_swap(or1, zbit);
+        //     continue;
+        // }
+
+        cout << "ADD: " << xor1 << " " << xor2 << endl;
+        cout << "CRY: " << and1 << " " << and2 << " " << or1 << endl;
+
+        cbit = or1;
+
         cout << endl;
-
-        // //for (auto w: wires) cout << w << " "; cout << endl;
-        //     set<string> w;
-        //     cout << "z" << buffer << " = " << make_expression("z" + string(buffer), w, g) << endl;
+        ++i;
     } 
 
-    // for (const auto& [w1, gate, w2, w3]: gates)
-    // {
-    //     ostringstream os;
-    //     os << w1 << "_" << gate << "_" << w2;
-
-    //     cout << "    " << w1 << " -> " << os.str() << ";\n";
-    //     cout << "    " << w2 << " -> " << os.str() << ";\n";
-    //     cout << "    " << os.str() << " -> " << w3 << ";\n";
-    // }
-
-
-    // for (const auto [w3, expr]: expressions)
-    // {
-    //     if (w3[0] == 'z')
-    //     {
-    //         set<string> wires;
-    //         auto e = make_expression(w3, wires, expressions);
-    //         cout << w3 << " = " << e << endl;
-    //         //make_expression(w3, wires, expressions);
-    //         for (const auto& w: wires) cout << w << " "; cout << endl;
-    //     }
-
-    // }
-
-    // for (auto i: aoc::range(45))
-    // {
-    //     uint64_t value = uint64_t{1} << i;
-
-    //     array<string, 45> x = 
-    //     { 
-    //         "x00", "x01", "x02", "x03", "x04", "x05", "x07", "x08", "x09", 
-    //         "x10", "x11", "x12", "x13", "x14", "x15", "x17", "x18", "x19", 
-    //         "x20", "x21", "x22", "x23", "x24", "x25", "x27", "x28", "x29", 
-    //         "x30", "x31", "x32", "x33", "x34", "x35", "x37", "x38", "x39", 
-    //         "x40", "x41", "x42", "x43", "x44" 
-    //     }; 
-    //     array<string, 45> y = 
-    //     { 
-    //         "y00", "y01", "y02", "y03", "y04", "y05", "y07", "y08", "y09", 
-    //         "y10", "y11", "y12", "y13", "y14", "y15", "y17", "y18", "y19", 
-    //         "y20", "y21", "y22", "y23", "y24", "y25", "y27", "y28", "y29", 
-    //         "y30", "y31", "y32", "y33", "y34", "y35", "y37", "y38", "y39", 
-    //         "y40", "y41", "y42", "y43", "y44" 
-    //     }; 
-
-    //     vector<tuple<string, int>> init2;
-    //     for (auto j: aoc::range(45))
-    //     {
-    //         init2.push_back({x[j], (i == j)});
-    //         init2.push_back({y[j], (i == j)});
-    //     }
-
-    //     cout << i << " " << value << " " << part1(init2, gates) << endl;
-    // }
+    for (auto [k, v]: swaps)
+        cout << k << ",";
+    cout << endl;
 
     return 0;
 }
