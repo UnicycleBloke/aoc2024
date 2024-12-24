@@ -76,67 +76,35 @@ auto part2(const T& init, const U& gates)
         sprintf(buffer, "%02d", i);  
 
         set<string> wires;
-        map<string, tuple<string, string, string>> g;
+        set<tuple<string, string, string, string>> sub_gates;
         wires.insert("x" + string(buffer));
         wires.insert("y" + string(buffer));
-        wires.insert("z" + string(buffer));
+        //wires.insert("z" + string(buffer));
 
         for (const auto& [w1, gate, w2, w3]: gates)
         {
-            if (wires.find(w1) != wires.end())
+            if (wires.find(w1) != wires.end() || wires.find(w2) != wires.end())
             {
-                wires.insert(w2);
                 wires.insert(w3);
-                g[w3] = make_tuple(w1, w2, gate);
-            } 
-            if (wires.find(w2) != wires.end())
-            {
-                wires.insert(w1);
-                wires.insert(w3);
-                g[w3] = make_tuple(w1, w2, gate);
-            } 
-            if (wires.find(w3) != wires.end())
-            {
-                wires.insert(w1);
-                wires.insert(w2);
-                g[w3] = make_tuple(w1, w2, gate);
-            } 
-            if (wires.find(w1) != wires.end())
-            {
-                wires.insert(w2);
-                wires.insert(w3);
-                g[w3] = make_tuple(w1, w2, gate);
-            } 
-            if (wires.find(w2) != wires.end())
-            {
-                wires.insert(w1);
-                wires.insert(w3);
-                g[w3] = make_tuple(w1, w2, gate);
+                sub_gates.insert(make_tuple(w1, gate, w2, w3));
             } 
         }
         for (const auto& [w1, gate, w2, w3]: gates)
         {
-            if ((wires.find(w1) != wires.end()) && (wires.find(w2) != wires.end()))
+            if (wires.find(w1) != wires.end() || wires.find(w2) != wires.end())
             {
                 wires.insert(w3);
-                g[w3] = make_tuple(w1, w2, gate);
-            }
-        }
-        for (const auto& [w1, gate, w2, w3]: gates)
-        {
-            if ((wires.find(w1) != wires.end()) && (wires.find(w2) != wires.end()))
-            {
-                wires.insert(w3);
-                g[w3] = make_tuple(w1, w2, gate);
-            }
+                sub_gates.insert(make_tuple(w1, gate, w2, w3));
+            } 
         }
 
-        //for (auto w: wires) cout << w << " "; cout << endl;
-            //cout << w3 << " = (" << w1 << " " << gate << " " << w2 << ")" << endl; 
-            set<string> w;
-            cout << "z" << buffer << " = " << make_expression("z" + string(buffer), w, g) << endl;
-        
+        for (const auto& [w1, gate, w2, w3]: sub_gates)
+            cout << w3 << " = (" << w1 << " " << gate << " " << w2 << ")" << endl; 
+        cout << endl;
 
+        // //for (auto w: wires) cout << w << " "; cout << endl;
+        //     set<string> w;
+        //     cout << "z" << buffer << " = " << make_expression("z" + string(buffer), w, g) << endl;
     } 
 
     // for (const auto& [w1, gate, w2, w3]: gates)
