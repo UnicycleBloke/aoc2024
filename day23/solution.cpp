@@ -131,6 +131,8 @@ auto part2(T& input)
     set<int> consumed;
     for (const auto& [p, v]: neighbours)     
     {
+        print(p);
+        cout << endl;
         if (consumed.find(p) != consumed.end()) continue;
 
         // Seed cluster 
