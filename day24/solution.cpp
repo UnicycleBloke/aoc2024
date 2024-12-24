@@ -41,10 +41,47 @@ auto part1(const T& init, const U& gates)
 }
 
 
+string make_expression(const string& w3, set<string>& wires, map<string, tuple<string, string, string>> expr)
+{
+    if (expr.find(w3) == expr.end()) return w3;
+    const auto& [w1, w2, gate] = expr[w3];
+
+    // if ((w1[0] == 'x') || (w1[0] == 'y')) wires.insert(w1);
+    // if ((w2[0] == 'x') || (w2[0] == 'y')) wires.insert(w2);
+    wires.insert(w1);
+    wires.insert(w2);
+
+    ostringstream os;
+    cout << w3 << " = (" << w1 << " " << gate << " " << w2 << ")" << endl;
+    os << "(" << make_expression(w1, wires, expr) << " " << gate << " " << make_expression(w2, wires, expr) << ")";
+    return os.str();
+}
+
+
 template <typename T, typename U>
 auto part2(const T& init, const U& gates)
 {
     aoc::timer timer;
+
+    map<string, tuple<string, string, string>> expressions;
+    for (const auto& [w1, gate, w2, w3]: gates)
+    {
+        expressions[w3] = make_tuple(w1, w2, gate);
+    }
+
+    // for (const auto [w3, expr]: expressions)
+    // {
+    //     if (w3[0] == 'z')
+    //     {
+    //         set<string> wires;
+    //         auto e = make_expression(w3, wires, expressions);
+    //         cout << w3 << " = " << e << endl;
+    //         //make_expression(w3, wires, expressions);
+    //         for (const auto& w: wires) cout << w << " "; cout << endl;
+    //     }
+
+    // }
+
 
     for (auto i: aoc::range(45))
     {
