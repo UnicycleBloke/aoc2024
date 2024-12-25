@@ -1,49 +1,69 @@
 #include "utils.h"
 
+struct Item
+{
+    int           size{};
+    array<int, 5> cols{};
+};
 
-template <typename T>
-auto part1(const T& input)
+
+auto part1(const vector<Item>& keys, vector<Item>& locks)
 {
     aoc::timer timer;
-    return 0;
+
+    cout << keys.size() << " " << locks.size() << endl;
+
+    int pairs = 0;
+    for (const auto& key: keys)
+    {
+        for (const auto& lock: locks)
+        {
+            bool fits = true;
+            for (auto c: aoc::range(5))
+                fits &= ((key.cols[c] + lock.cols[c]) <= lock.size);
+            pairs += fits;
+        }
+    }
+
+    return pairs;
 }
 
 
-template <typename T>
-auto part2(T& input)
-{
-    aoc::timer timer;
-    return 0;
-}
-
-
-// vector<tuple<Args...>>
-//auto lines = aoc::read_lines<int,int,int,int>(filename, R"((\d+)-(\d+),(\d+)-(\d+))");
-
-// vector<string>    
-//auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
-
-// Replace all substrings matching "search" with "replace".
-//std::string replace(std::string source, const std::string& search, const std::string& replace);
-
-// Split a delimited string of tokens into a vector of string tokens. Trims substrings by default and drops trimmed 
-// tokens which are empty by default. Not convinced how useful the option are, but you never know.
-//std::vector<std::string> split(std::string source, std::string delim, Blanks allow_blanks = Blanks::Suppress, Trim trim_subs = Trim::Yes);
-
-// vector (size_type n, const value_type& val = value_type(),
-//vector<int> row(COLS, 0);
-//vector<vector<int>> grid(ROWS, row);
 void run(const char* filename)
 {
-    auto lines = aoc::read_lines(filename, aoc::Blanks::Suppress); 
+    auto lines = aoc::read_lines(filename, aoc::Blanks::Allow); 
 
-    auto p1 = part1(lines);
+    vector<Item> keys;
+    vector<Item> locks;
+
+    int i = 0;
+    while (i < lines.size())    
+    {
+        bool is_key = (lines[i] == ".....");
+
+        Item item{};
+ 
+        while (lines[i].size() > 0)
+        {   
+            ++item.size; 
+            //cout << lines[i] << endl;
+            for (auto k: aoc::range(5))
+                item.cols[k] += (lines[i][k] == '#');
+            ++i;
+        }
+        //cout << endl;
+
+        while (lines[i].size() == 0) ++i;
+
+        if (is_key) 
+            keys.push_back(item); 
+        else 
+            locks.push_back(item);
+
+    }
+
+    auto p1 = part1(keys, locks);
     cout << "Part1: " << p1 << '\n';
-    
-
-    auto p2 = part2(lines);
-    cout << "Part2: " << p2 << '\n';
-    
 }
 
 
