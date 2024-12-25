@@ -1,5 +1,6 @@
 #include "utils.h"
 
+
 struct Item
 {
     int           size{};
@@ -10,8 +11,6 @@ struct Item
 auto part1(const vector<Item>& keys, vector<Item>& locks)
 {
     aoc::timer timer;
-
-    cout << keys.size() << " " << locks.size() << endl;
 
     int pairs = 0;
     for (const auto& key: keys)
@@ -42,24 +41,19 @@ void run(const char* filename)
         bool is_key = (lines[i] == ".....");
 
         Item item{};
- 
         while (lines[i].size() > 0)
         {   
             ++item.size; 
-            //cout << lines[i] << endl;
             for (auto k: aoc::range(5))
                 item.cols[k] += (lines[i][k] == '#');
             ++i;
         }
-        //cout << endl;
-
         while (lines[i].size() == 0) ++i;
 
         if (is_key) 
             keys.push_back(item); 
         else 
             locks.push_back(item);
-
     }
 
     auto p1 = part1(keys, locks);
